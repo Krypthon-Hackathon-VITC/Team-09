@@ -11,11 +11,10 @@ app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or "super-secret-k
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY") or "super-secret-jwt-secret-key"
 jwt = JWTManager(app)
 
+mongo_uri = os.environ.get("MONGO_URI") or "mongo-uri"
+
 maxSevSelDelay=1000
-try:
-    mongodb = MongoClient(os.environ["MONGO_URI"], serverSelectionTimeoutMS=maxSevSelDelay)
-    db = mongodb['BANK_DATA']
-except:
-    exit(1)
+mongodb = MongoClient(mongo_uri, serverSelectionTimeoutMS=maxSevSelDelay)
+db = mongodb['BANK_DATA']
 
 import endpoints

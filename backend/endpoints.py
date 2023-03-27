@@ -1,31 +1,33 @@
 import json
 from app import app, db
-from flask import jsonify, render_template, Response, request
+from flask import jsonify, render_template, Response, request, redirect, url_for
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime
 import hashlib
+
+from forms import LoginForm
 
 @app.route("/")
 def homepage():
     return render_template("index.html")
 
-@app.route("/login", methods=("POST",))
+@app.route("/login", methods=("POST", "GET"))
 def login():
-    flag = False
-    try:
-        username = request.form.get("username")
+    form = LoginForm(request.form)
+
+    if form.validate():
+        username = request.form["username"]
         password = request.form.get("password")
         password = hashlib.sha256(password.encode()).hexdigest()
         query = db["USERS"].find_one({ "USR_NAME" : username })
-        if query["PASS"].lower() == password.lower():
-            flag = True
-    except:
-        flag = False
-    if flag:
-        jwt_token = create_access_token(identity=json.dumps({"user":username}))
-        return jsonify({'token': jwt_token})
-    else:
-        return Response(status=400)
+        if query is not None:
+            if query["PASS"].lower() == password.lower():
+                jwt_token = create_access_token(identity=json.dumps({"user":username}))
+                return jsonify(jwt_token)
+        else:
+            return Response(status=401)
+
+    return Response(status=400)
 
 @app.route("/dashboard")
 @jwt_required()
