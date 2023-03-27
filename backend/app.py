@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
-app.config["JWT_SECRET_KEY"] = os.environ["JWT_SECRET_KEY"]
+app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or "super-secret-key"
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY") or "super-secret-jwt-secret-key"
 jwt = JWTManager(app)
 
 maxSevSelDelay=1000
