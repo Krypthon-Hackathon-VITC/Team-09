@@ -1,12 +1,12 @@
 import json
-from app import app, db, mongodb
-from flask import jsonify, render_template, Response, request, redirect, url_for
+from flask import jsonify, render_template, Response, request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 import datetime
 from helper import *
 import hashlib
 
-from forms import LoginForm
+from app import app, db, mongodb
+from forms import LoginForm, SignupForm
 
 @app.route("/")
 def homepage():
@@ -85,18 +85,33 @@ def transfer():
 
     return Response(status=200)
 
-app.route("/withdraw", methods=("POST",))
-@jwt_required()
-def withdraw():
-    user= json.loads(get_jwt_identity())["user"]
-    amount = int(request.form.get("amount"))
-    db["USERS"].update_one({'USR_NAME': user},
-            {'$set': {'BALANCE' : from_bal - amount}})
 
-app.route("/deposit", methods=("POST",))
-@jwt_required()
-def withdraw():
-    user= json.loads(get_jwt_identity())["user"]
-    amount = int(request.form.get("amount"))
-    db["USERS"].update_one({'USR_NAME': user},
-            {'$set': {'BALANCE' : from_bal + amount}})
+@app.route("/signup", methods=["POST", "GET"])
+def signup():
+    form = SignupForm(request.form)
+
+    if form.validate():
+        print("Valid")
+        username = request.form["username"]
+        query = db["USERS"].find_one({ "USR_NAME" : username })
+        if query is not None:
+            return Response(status=400)
+
+        password = request.form["password"]
+        confirm_password = request.form["confirm_password"]
+        if password != confirm_password:
+            return Response(status=400)
+        
+        db["USERS"].insert_one({
+            'USR_NAME': request.form["username"],
+            'NAME': request.form["name"],
+            'PASS': hashlib.sha256(request.form["password"].encode()).hexdigest(),
+            'PHONE': request.form["phone"],
+            'PAN': request.form["pan"],
+            'ACC_TYPE': request.form["account_type"],
+            'USR_TYPE': "regular",
+            'BLANCE': 0,
+        })
+
+        return Response(status=200)
+    return Response(status=400)
