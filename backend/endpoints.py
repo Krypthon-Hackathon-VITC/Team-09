@@ -1,8 +1,9 @@
 import json
-from app import app, db
+from app import app, db, mongodb
 from flask import jsonify, render_template, Response, request, redirect, url_for
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from datetime import datetime
+import datetime
+from helper import *
 import hashlib
 
 from forms import LoginForm
@@ -41,8 +42,7 @@ def bank():
 @jwt_required()
 def balance():
     username = json.loads(get_jwt_identity())["user"]
-    query = db["USERS"].find_one({"USR_NAME" : username})
-    return jsonify({'balance': query['BALANCE']})
+    return jsonify({'balance': get_balance(username)})
 
 @app.route("/statements", methods=("POST",))
 @jwt_required()
@@ -52,3 +52,37 @@ def statements():
             {"$or": [{'FROM': username}, {'TO': username}]},
             {'_id': False}))
     return jsonify({'transactions': transactions})
+
+@app.route("/transfer", methods=("POST",))
+@jwt_required()
+def transfer():
+    user_from = json.loads(get_jwt_identity())["user"]
+
+    user_to = request.form.get("user_to")
+    amount = int(request.form.get("amount"))
+    remark = request.form.get("remark") or ''
+
+    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0:
+        return Response(status=400)
+
+    from_bal = get_balance(user_from)
+    to_bal = get_balance(user_to)
+
+    if amount > from_bal:
+        return Response(status=400)
+
+    with mongodb.start_session() as session:
+        with session.start_transaction():
+            db["USERS"].update_one({'USR_NAME': user_from},
+                    {'$set': {'BALANCE' : from_bal - amount}})
+            db["USERS"].update_one({'USR_NAME': user_to},
+                    {'$set': {'BALANCE' : to_bal + amount}})
+
+            db["TRANSACTIONS"].insert_one(
+                    {'TIME': datetime.datetime.now(),
+                        'FROM': user_from,
+                        'TO': user_to,
+                        'AMOUNT': amount,
+                        'REMARK': remark})
+
+    return Response(status=200)
