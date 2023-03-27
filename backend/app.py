@@ -2,6 +2,9 @@ import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
@@ -14,3 +17,5 @@ try:
     db = mongodb['BANK_DATA']
 except:
     exit(1)
+
+import endpoints
