@@ -21,6 +21,10 @@ class SignupForm(Form):
     ], validators=[input_required()])
     submit = SubmitField('submit')
 
+    def validate_account_type(form, field):
+        if field.data not in ("savings", "current"):
+            raise ValidationError("Invaild Account type")
+
     def validate_pan(form, field):
         pattern = r"[A-Z]{5}[0-9]{4}[A-Z]{1}"
         if not re.match(pattern, field.data):

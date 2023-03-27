@@ -1,12 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bank</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+{% endblock %}
+
+{% block more_header %}
+{{ super() }}
+<div class="header_options login" id="login_header">Sign in</div>
+{% endblock %}
+
+{% block main %}
+
+<div id="login-page">
+    <div class="login-page-head"></div>
+    <div class="login-page-head">Username</div>
+    <input class="login-page-input" name="username"></input>
+    <div class="login-page-head">Password</div>
+    <input class="login-page-input" name="password" type="password"></input>
+    <div class="login-page-head">Confirm Password</div>
+    <input class="login-page-input" name="confirm_password" type="password"></input>
+    <div class="login-page-head login-register">Account Holder Name</div>
+    <input class="login-page-input login-register" name="name"></input>
+    <div class="login-page-head login-register">Phone number</div>
+    <input class="login-page-input login-register" name="phone"></input>
+    <div class="login-page-head login-register">PAN</div>
+    <input class="login-page-input login-register" name="pan"></input>
+    <div class="login-page-head login-register">Account Type</div>
+    <select id="login-selection" class="login-register">
+        <option value="0" selected>Select Type</option>
+        <option value="1">Savings</option>
+        <option value="2">Current</option>
+    </select>
+    <div id="login-login-upper" class="login-button">Login</div>
+    <div id="login-sign-in" class="login-button">Register</div>
+    <div id="login-login-lower" class="login-button">Login</div>
+</div>
+{% endblock %}
+
+{% block below_body %}
+
+<script>
+    var register = false;
+
+    function login_only() {
+        register = false;
+        let button = document.getElementById("login-login-upper");
+        button.style.display = "block";
+        document.getElementById("login-login-lower").style.display = "none";
+        let button_reg = document.getElementById("login-sign-in");
+        button_reg.style.display = "block";
+        button_reg.style.backgroundColor = "white";
+        button_reg.style.color = "black";
+
+        document.querySelectorAll(".login-register").forEach((x) => {
+            x.style.display = "none";
+        });
+    }
+
+    function register_only() {
+        register = true;
+        let button = document.getElementById("login-sign-in");
+        button.style.display = "block";
+        button.style.backgroundColor = "black";
+        button.style.color = "white";
+        document.getElementById("login-login-upper").style.display = "none";
+        let button_reg = document.getElementById("login-login-lower");
+        button_reg.style.display = "block";
+
+        document.querySelectorAll(".login-register").forEach((x) => {
+            x.style.display = "block";
+        });
+    }
+
+    login_only()
+
+    document.getElementById("login_header").addEventListener("click", (e) => {
+        document.getElementById("login-page").style.display = "flex";
+    })
+
+    document.getElementById("login-login-lower").addEventListener("click", (e) => {
+        login_only();
+    })
+
+    document.getElementById("login-sign-in").addEventListener("click", (e) => {
+        register_only();
+        if(register){
+            sendRegister();
+        }
+    })
+
+    document.getElementById("login-login-upper").addEventListener("click", (e) => {
+        console.log("yo");
+        sendLogin();
+    })
+
+    function sendLogin() {
+        let formData = new FormData();
+        let fields = document.querySelectorAll(".login-page-input");
+        fields.forEach((elem) => {
+            if (!elem.classList.contains("login-register")
+                && elem.getAttribute("name")) {
+                formData.append(elem.getAttribute("name"), elem.value);
+            }
+        })
+
+        fetch("/login", {
+            method : "POST",
+            body : formData
+        }).then((res) => res.json())
+        .then((data) =>{
+            console.log(data);
+        })
+    }
+
+    function sendRegister(){
+        let formData = new FormData();
+        let fields = document.querySelectorAll(".login-page-input");
+        fields.forEach((elem) => {
+            if (elem.getAttribute("name")) {
+                formData.append(elem.getAttribute("name"), elem.value);
+            }
+        })
+
+        let acc_type = document.getElementById("login-selection");
+        if(acc_type.value == "0"){
+            return
+        }
+        else{
+            formData.append("account_type", acc_type.options[acc_type.selectedIndex].text.toLowerCase())
+        }
+
+        fetch("/signup", {
+            method : "POST",
+            body : formData
+        }).then((res) => res.json())
+        .then((data) =>{
+            console.log(data);
+        })
+    }
+
+</script>
+
+{% endblock %}

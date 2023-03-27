@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Concert+One&family=Raleway&family=Roboto+Slab:wght@900&display=swap');
+
+body{
+    margin: 0;
+    font-family: 'Raleway', sans-serif;;
+}
+
+.main{
+    width: 100vw;
+    max-width: 1920px;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    background-color: black;
+    display: flex;
+    width: 100vw;
+    height: 20px;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    position: fixed;
+}
+
+.header_options{
+    min-width: 80px;
+    color: white;
+    padding: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.header_options a{
+    color: inherit;
+    text-decoration: none;
+}
+
+.bank-name{
+    font-family: 'Roboto Slab', serif;
+    font-size: 30px;
+}
+
+.hamburger{
+    transform: scale(1.25);
+    display: none;
+    right: 0;
+    position: absolute;
+}

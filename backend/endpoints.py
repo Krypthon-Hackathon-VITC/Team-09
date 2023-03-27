@@ -86,7 +86,7 @@ def transfer():
     return Response(status=200)
 
 
-@app.route("/signup", methods=["POST", "GET"])
+@app.route("/signup", methods=("POST",))
 def signup():
     form = SignupForm(request.form)
 
