@@ -62,9 +62,7 @@ def transfer():
     amount = int(request.form.get("amount"))
     remark = request.form.get("remark") or ''
 
-    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0:
-        return Response(status=400)
-
+    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0: return Response(status=400)
     from_bal = get_balance(user_from)
     to_bal = get_balance(user_to)
 
@@ -86,3 +84,19 @@ def transfer():
                         'REMARK': remark})
 
     return Response(status=200)
+
+app.route("/withdraw", methods=("POST",))
+@jwt_required()
+def withdraw():
+    user= json.loads(get_jwt_identity())["user"]
+    amount = int(request.form.get("amount"))
+    db["USERS"].update_one({'USR_NAME': user},
+            {'$set': {'BALANCE' : from_bal - amount}})
+
+app.route("/deposit", methods=("POST",))
+@jwt_required()
+def withdraw():
+    user= json.loads(get_jwt_identity())["user"]
+    amount = int(request.form.get("amount"))
+    db["USERS"].update_one({'USR_NAME': user},
+            {'$set': {'BALANCE' : from_bal + amount}})
