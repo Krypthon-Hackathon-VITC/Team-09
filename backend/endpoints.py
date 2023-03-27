@@ -91,7 +91,6 @@ def signup():
     form = SignupForm(request.form)
 
     if form.validate():
-        print("Valid")
         username = request.form["username"]
         query = db["USERS"].find_one({ "USR_NAME" : username })
         if query is not None:
@@ -102,12 +101,19 @@ def signup():
         if password != confirm_password:
             return Response(status=400)
         
+        pincode = request.form["pin"]
+        pin_query = db["PINCODE"].find_one({"Pincode": pincode})
+        if pin_query is None:
+            return Response(status=400)
+        
         db["USERS"].insert_one({
             'USR_NAME': request.form["username"],
             'NAME': request.form["name"],
             'PASS': hashlib.sha256(request.form["password"].encode()).hexdigest(),
             'PHONE': request.form["phone"],
             'PAN': request.form["pan"],
+            'PIN': request.form["pin"],
+            'VOTE_REGION': pin_query["StateName"],
             'ACC_TYPE': request.form["account_type"],
             'USR_TYPE': "regular",
             'BLANCE': 0,

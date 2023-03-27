@@ -15,6 +15,7 @@ class SignupForm(Form):
     confirm_password = PasswordField('confirm_password', validators=[input_required()])
     phone = StringField('phone', validators=[input_required(), length(10)])
     pan = StringField('pan', validators=[input_required(), length(10)])
+    pin = StringField('pin', validators=[input_required(), length(6)])
     account_type = SelectField('account_type', choices=[
         ('savings', "Savings"),
         ('current', 'Current')
