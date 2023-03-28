@@ -21,6 +21,7 @@ header{
     justify-content: flex-start;
     padding: 20px;
     position: fixed;
+    top: 0;
 }
 
 .header_options{

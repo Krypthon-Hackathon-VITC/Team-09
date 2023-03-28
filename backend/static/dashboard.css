@@ -1,0 +1,39 @@
+.main {
+    margin-top: 80px;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    min-height: calc(100vh - 80px);
+}
+
+.dashboard-link {
+    text-decoration: none;
+}
+
+#dashboard-below {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+}
+
+.dashboard-cards {
+    width: 200px;
+    height: 200px;
+    display: grid;
+    grid-template-rows: 1fr 30px;
+    justify-items: center;
+    align-items: center;
+    background-color: greenyellow;
+    color: black;
+}
+
+.dashboard-cards svg {
+    transform: scale(3);
+}
+
+#dashboard-balance {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 90px;
+}
