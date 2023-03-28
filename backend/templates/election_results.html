@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block more_header %}
+{{ super() }}
+{% endblock %}
+
+{% block main %}
+<div class="container" style="margin-top:70px;">
+    <h1>Election Results</h1>
+    <table id="data" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Candidate ID</th>
+                <th>State</th>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Votes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vote in vote_list %}
+            <tr>
+                <td>{{ vote['CANDIDATE_ID'] }}</td>
+                <td>{{ vote['STATE'] }}</td>
+                <td>{{ vote['USR_NAME'] }}</td>
+                <td>{{ vote['NAME'] }}</td>
+                <td data-sort="{{vote['VOTES']}}">{{ vote['VOTES'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

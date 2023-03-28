@@ -1,7 +1,8 @@
+from bson import ObjectId
 from flask import jsonify, render_template, Response, request, \
-                  make_response, url_for, redirect
+    make_response, url_for, redirect
 from flask_jwt_extended import create_access_token, get_jwt_identity, \
-                               jwt_required, set_access_cookies
+    jwt_required, set_access_cookies, get_jwt
 from helper import *
 
 import datetime
@@ -11,7 +12,23 @@ import uuid
 
 from app import app, db, mongodb, MODEL, jwt
 from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, \
-                  ElectionsVote, LoanForm, TransferForm
+    ElectionsVote, LoanForm, TransferForm
+
+
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.datetime.now(datetime.timezone.utc)
+        target_timestamp = datetime.timestamp(
+            now + datetime.timedelta(minutes=15))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original response
+        return response
 
 
 @app.route("/")
@@ -100,9 +117,9 @@ def transfer():
         with mongodb.start_session() as session:
             with session.start_transaction():
                 db["USERS"].update_one({'USR_NAME': user_from},
-                                    {'$set': {'BALANCE': from_bal - amount}})
+                                       {'$set': {'BALANCE': from_bal - amount}})
                 db["USERS"].update_one({'USR_NAME': user_to},
-                                    {'$set': {'BALANCE': to_bal + amount}})
+                                       {'$set': {'BALANCE': to_bal + amount}})
 
                 db["TRANSACTIONS"].insert_one({
                     'TIME': datetime.datetime.now(),
@@ -228,7 +245,8 @@ def election_stand():
 
         if check_query is not None:
             print("DELETING")
-            db["CANDIDATES"].find_one_and_delete({"CANDIDATE_ID": str(user["_id"])})
+            db["CANDIDATES"].find_one_and_delete(
+                {"CANDIDATE_ID": str(user["_id"])})
             return render_template("election_stand.html", unlisted="Successfully withdrew")
         else:
             db["CANDIDATES"].insert_one({
@@ -237,14 +255,13 @@ def election_stand():
                 "REGION": user["VOTE_REGION"],
                 "MANIFESTO": request.form.get("manifesto")
             })
-        
+
             return render_template("election_stand.html", succ="Successfully registered")
-    
+
     if check_query is not None:
         return render_template("election_stand.html", manifesto=check_query["MANIFESTO"])
 
     return render_template("election_stand.html")
-
 
 
 @app.route('/election/vote', methods=("POST", "GET"))
@@ -254,7 +271,7 @@ def election_vote():
     user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
     form = ElectionsVote(request.form, username)
 
-    candidates=form.candidate.choices
+    candidates = form.candidate.choices
 
     election_id = str(db["ELECTIONS"].find_one({})["_id"])
     votes_query = db["VOTES"].find_one({
@@ -302,17 +319,28 @@ def election_vote():
 
 @app.route("/election/results", methods=("POST", "GET"))
 def election_results():
-    election_latest = db["ELECTIONS"].find_one({})
-    votes = db["VOTES"].find({
+    election_latest = db["ELECTIONS"].find_one()
+    candidates = db["CANDIDATES"].find({
         "ELECTION_ID": str(election_latest["_id"])
     })
 
     vote_lst = []
-    for vote in votes:
-        vote_dict = dict(vote)
-        del vote_dict['_id']
-        vote_lst.append(vote_dict)
-    return jsonify(vote_lst)
+    for candidate in candidates:
+        votes = db["VOTES"].count_documents({
+            "CANDIDATE_ID": candidate["CANDIDATE_ID"]
+        })
+        candidate_name = db["USERS"].find_one({
+            "_id" : ObjectId(candidate["CANDIDATE_ID"])
+        })
+        
+        vote_lst.append({
+            "CANDIDATE_ID" : candidate["CANDIDATE_ID"],
+            "VOTES" : votes,
+            "NAME" : candidate_name["NAME"],
+            "USR_NAME" : candidate_name["USR_NAME"],
+            "STATE" : candidate["REGION"]
+        })
+    return render_template("election_results.html", vote_list=vote_lst)
 
 
 @app.route("/loan", methods=("GET", "POST"))
@@ -387,7 +415,8 @@ def loan():
     #     ((1+0.04)**(int(request.form.get("time_duration"))))
     # P x R x (1+R)^N / [(1+R)^N-1]
     ci = (p*r*(1+r)**n)/((1+r)**(n-1))
-    ei = int(request.form.get("applicantincome")) - 0.1*int(request.form.get("applicantincome"))
+    ei = int(request.form.get("applicantincome")) - \
+        0.1*int(request.form.get("applicantincome"))
 
     print(ci, ei, flag)
     if ci > ei:
