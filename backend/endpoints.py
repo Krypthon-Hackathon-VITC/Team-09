@@ -8,7 +8,8 @@ from helper import *
 import hashlib
 
 from app import app, db, mongodb
-from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote
+from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanForm
+
 
 @app.route("/")
 def homepage():
@@ -144,7 +145,7 @@ def new_ticket():
             "TIME": datetime.datetime.now(),
             "STATUS": False,
             "TICKET_ID": str(uuid.uuid4()).replace("-", ""),
-            "REPLY" : ""
+            "REPLY": ""
         })
 
         return redirect(url_for('complaint', success=True))
@@ -187,6 +188,7 @@ def signup():
         return Response(status=200)
     return Response(status=400)
 
+
 @app.route("/election/stand", methods=("POST", "GET"))
 @jwt_required()
 def election_stand():
@@ -194,8 +196,9 @@ def election_stand():
     if form.validate():
         username = json.loads(get_jwt_identity())["user"]
         user = db["USERS"].find_one({"USR_NAME": username})
-        
-        pw_hash = hashlib.sha256(request.form.get("password").encode()).hexdigest()
+
+        pw_hash = hashlib.sha256(request.form.get(
+            "password").encode()).hexdigest()
         pw_db = user["PASS"]
         if pw_hash != pw_db:
             return Response(status=400)
@@ -217,6 +220,7 @@ def election_stand():
     return render_template("test_stand.html")
     return Response(status=400)
 
+
 @app.route('/election/vote', methods=("POST", "GET"))
 @jwt_required()
 def election_vote():
@@ -226,13 +230,15 @@ def election_vote():
     if form.validate():
         print("Form Validated")
 
-        pw_hash = hashlib.sha256(request.form.get("password").encode()).hexdigest()
+        pw_hash = hashlib.sha256(request.form.get(
+            "password").encode()).hexdigest()
         pw_db = db["USERS"].find_one({"USR_NAME": username})["PASS"]
         if pw_hash != pw_db:
             return Response(status=400)
 
         user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
-        user_state = db["USERS"].find_one({"USR_NAME": username})["VOTE_REGION"]
+        user_state = db["USERS"].find_one(
+            {"USR_NAME": username})["VOTE_REGION"]
 
         election_id = str(db["ELECTIONS"].find_one({})["_id"])
         votes_query = db["VOTES"].find_one({
@@ -242,7 +248,7 @@ def election_vote():
         if votes_query is not None:
             print(votes_query)
             return Response(status=400)
-        
+
         db["VOTES"].insert_one({
             "VOTER_ID": str(user_id),
             "CANDIDATE_ID": request.form["candidate"],
@@ -255,19 +261,21 @@ def election_vote():
 
     return render_template("test_vote.html", form=form)
 
-@app.route("/election/results", methods=("POST","GET"))
+
+@app.route("/election/results", methods=("POST", "GET"))
 def election_results():
     election_latest = db["ELECTIONS"].find_one({})
     votes = db["VOTES"].find({
         "ELECTION_ID": str(election_latest["_id"])
     })
-    
+
     vote_lst = []
     for vote in votes:
         vote_dict = dict(vote)
         del vote_dict['_id']
         vote_lst.append(vote_dict)
     return jsonify(vote_lst)
+
 
 @app.route("/loan", methods=("GET", "POST"))
 @jwt_required()
@@ -277,7 +285,7 @@ def loan():
         return render_template("loan.html", success=success)
 
     user = json.loads(get_jwt_identity())["user"]
-    
+
     db["LOANS"].insert_one({
         'USR_NAME': user,
         'APPLICATION_DATE': datetime.datetime.now(),
@@ -290,10 +298,20 @@ def loan():
             'housing': request.form.get('assets_housing'),
             'car': request.form.get('assets_car'),
             'gold': request.form.get('assets_gold')
-            },
+        },
         'CONFIDENCE': 0,
         'APPROVE_STATUS': False,
-        'RETURNED': False,
+        'RETURNED': 0,
+        'GENDER': request.form.get("gender"),
+        "MARRIED": request.form.get("married"),
+        "DEPENDENTS": request.form.get("dependents"),
+        "EDUCATION": request.form.get("education"),
+        "SELF_EMPLOYED": request.form.get("self_employed"),
+        "APPLICANTINCOME": request.form.get("applicantincome"),
+        "COAPPLICANTINCOME": request.form.get("coapplicantincome"),
+        "LOANAMOUNT": request.form.get("loanamount"),
+        "LOAN_AMOUNT_TERM": request.form.get("loan_amount_term"),
+        "PROPERTY_AREA": request.form.get("property_area"),
     })
 
     return redirect(url_for('loan', success=True))
