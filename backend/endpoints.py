@@ -183,30 +183,36 @@ def signup():
     form = SignupForm(request.form)
 
     if form.validate():
-        username = request.form["username"]
+        username = form["username"].data
+        name = form["name"].data
+        phone = form["phone"].data
+        password = form["password"].data
+        confirm_password = form["confirm_password"].data
+        pan = form["pan"].data
+        pincode = form["pin"].data
+        account_type = form["account_type"].data
+
         query = db["USERS"].find_one({"USR_NAME": username})
         if query is not None:
             return Response(status=400)
 
-        password = request.form["password"]
-        confirm_password = request.form["confirm_password"]
         if password != confirm_password:
             return Response(status=400)
 
-        pincode = request.form["pin"]
         pin_query = db["PINCODE"].find_one({"Pincode": pincode})
         if pin_query is None:
             return Response(status=410)
+        vote_region = pin_query["StateName"]
 
         db["USERS"].insert_one({
-            'USR_NAME': request.form["username"],
-            'NAME': request.form["name"],
-            'PASS': hashlib.sha256(request.form["password"].encode()).hexdigest(),
-            'PHONE': request.form["phone"],
-            'PAN': request.form["pan"],
-            'PIN': request.form["pin"],
-            'VOTE_REGION': pin_query["StateName"],
-            'ACC_TYPE': request.form["account_type"],
+            'USR_NAME': username,
+            'NAME': name,
+            'PASS': get_hash(password),
+            'PHONE': phone,
+            'PAN': pan,
+            'PIN': pincode,
+            'VOTE_REGION': vote_region,
+            'ACC_TYPE': account_type,
             'USR_TYPE': "regular",
             'BALANCE': 0,
         })
