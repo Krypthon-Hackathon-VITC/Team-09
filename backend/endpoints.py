@@ -4,11 +4,11 @@ from flask import jsonify, render_template, Response, request, make_response, ur
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies
 import datetime
 from helper import *
+
 import hashlib
 
 from app import app, db, mongodb
-from forms import LoginForm, SignupForm, ComplaintForm
-
+from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote
 
 @app.route("/")
 def homepage():
@@ -181,8 +181,119 @@ def signup():
             'VOTE_REGION': pin_query["StateName"],
             'ACC_TYPE': request.form["account_type"],
             'USR_TYPE': "regular",
-            'BLANCE': 0,
+            'BALANCE': 0,
         })
 
         return Response(status=200)
     return Response(status=400)
+
+@app.route("/election/stand", methods=("POST", "GET"))
+@jwt_required()
+def election_stand():
+    form = ElectionStand(request.form)
+    if form.validate():
+        username = json.loads(get_jwt_identity())["user"]
+        user = db["USERS"].find_one({"USR_NAME": username})
+        
+        pw_hash = hashlib.sha256(request.form.get("password").encode()).hexdigest()
+        pw_db = user["PASS"]
+        if pw_hash != pw_db:
+            return Response(status=400)
+
+        election = db["ELECTIONS"].find({}).sort("END_DATE", -1)
+
+        check_query = db["CANDIDATES"].find_one({"CANDIDATE_ID": user["_id"]})
+        if check_query is not None:
+            db["CANDIDATES"].find_one_and_delete({"CANDIDATE_ID": user["_id"]})
+        else:
+            db["CANDIDATES"].insert_one({
+                "CANDIDATE_ID": str(user["_id"]),
+                "ELECTION_ID": str(election[0]["_id"]),
+                "REGION": user["VOTE_REGION"],
+                "MANIFESTO": request.form.get("manifesto")
+            })
+        return Response(status=200)
+
+    return render_template("test_stand.html")
+    return Response(status=400)
+
+@app.route('/election/vote', methods=("POST", "GET"))
+@jwt_required()
+def election_vote():
+    username = json.loads(get_jwt_identity())["user"]
+    form = ElectionsVote(request.form, username)
+
+    if form.validate():
+        print("Form Validated")
+
+        pw_hash = hashlib.sha256(request.form.get("password").encode()).hexdigest()
+        pw_db = db["USERS"].find_one({"USR_NAME": username})["PASS"]
+        if pw_hash != pw_db:
+            return Response(status=400)
+
+        user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
+        user_state = db["USERS"].find_one({"USR_NAME": username})["VOTE_REGION"]
+
+        election_id = str(db["ELECTIONS"].find_one({})["_id"])
+        votes_query = db["VOTES"].find_one({
+            "VOTER_ID": str(user_id),
+            "ELECTION_ID": election_id
+        })
+        if votes_query is not None:
+            print(votes_query)
+            return Response(status=400)
+        
+        db["VOTES"].insert_one({
+            "VOTER_ID": str(user_id),
+            "CANDIDATE_ID": request.form["candidate"],
+            "ELECTION_ID": election_id,
+            "STATE": user_state,
+            "TIME": datetime.datetime.now()
+        })
+
+        return Response(status=200)
+
+    return render_template("test_vote.html", form=form)
+
+@app.route("/election/results", methods=("POST","GET"))
+def election_results():
+    election_latest = db["ELECTIONS"].find_one({})
+    votes = db["VOTES"].find({
+        "ELECTION_ID": str(election_latest["_id"])
+    })
+    
+    vote_lst = []
+    for vote in votes:
+        vote_dict = dict(vote)
+        del vote_dict['_id']
+        vote_lst.append(vote_dict)
+    return jsonify(vote_lst)
+
+@app.route("/loan", methods=("GET", "POST"))
+@jwt_required()
+def loan():
+    if request.method == 'GET':
+        success = request.args.get('success') or False
+        return render_template("loan.html", success=success)
+
+    user = json.loads(get_jwt_identity())["user"]
+    
+    db["LOANS"].insert_one({
+        'USR_NAME': user,
+        'APPLICATION_DATE': datetime.datetime.now(),
+        'REVIEW_DATE': None,
+        'TIME_DURATION': request.form.get('time_duration'),
+        'INTEREST': 0.08,
+        'AMOUNT': request.form.get('amount'),
+        'L_TYPE': request.form.get('l_type'),
+        'ASSETS': {
+            'housing': request.form.get('assets_housing'),
+            'car': request.form.get('assets_car'),
+            'gold': request.form.get('assets_gold')
+            },
+        'CONFIDENCE': 0,
+        'APPROVE_STATUS': False,
+        'RETURNED': False,
+    })
+
+    return redirect(url_for('loan', success=True))
