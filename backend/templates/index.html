@@ -117,7 +117,7 @@
             body: formData
         }).then((res) => {
                 if(res.ok){
-                    document.getElementById("login-login-upper").style.backgroundColor = "green";
+                    window.location.href = "/dashboard";
                 }
             })
     }
@@ -145,6 +145,7 @@
         }).then((res) => {
             if (res.ok) {
                 document.getElementById("login-sign-in").style.backgroundColor = "green";
+                login_only()
             }
             else {
                 alert("registration failed")
