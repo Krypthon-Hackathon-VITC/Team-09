@@ -19,10 +19,10 @@ from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, \
 def refresh_expiring_jwts(response):
     try:
         exp_timestamp = get_jwt()["exp"]
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now()
         target_timestamp = datetime.datetime.timestamp(
             now + datetime.timedelta(minutes=15))
-        if target_timestamp > exp_timestamp:
+        if target_timestamp - exp_timestamp < 15:
             access_token = create_access_token(identity=get_jwt_identity())
             set_access_cookies(response, access_token)
         return response
@@ -30,6 +30,13 @@ def refresh_expiring_jwts(response):
         # Case where there is not a valid JWT. Just return the original response
         return response
 
+@app.route("/delete_token", methods=("GET",))
+@jwt_required()
+def delete_token():
+    resp = make_response(redirect(url_for("homepage")))
+    token = create_access_token(identity=get_jwt_identity(), expires_delta=datetime.timedelta(days=-1000))
+    set_access_cookies(resp, token)
+    return resp
 
 @app.route("/")
 def homepage():

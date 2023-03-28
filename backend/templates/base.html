@@ -39,7 +39,8 @@
         <div class="header_options">About us</div>
         {% block more_header %} {% endblock %}
         {% if not indexhai %}
-        <div class="header_options login" id="login_header" style="position:absolute; right:0;">Sign out</div>
+        <div class="header_options login" id="login_header" style="position:absolute; right:0;" onclick="logout(this);">
+            Sign out</div>
         {% endif %}
     </header>
     <div class="main">
@@ -49,5 +50,11 @@
 </body>
 {% block below_body %}
 {% endblock %}
+
+<script>
+    function logout(e) {
+        window.location.href = "/delete_token";
+    }
+</script>
 
 </html>
