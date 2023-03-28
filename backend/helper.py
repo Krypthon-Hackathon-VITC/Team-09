@@ -13,10 +13,10 @@ def check_password_hash(password: str, hash: str):
         return True
     return False
 
-def get_jwt_user():
+def get_jwt_username():
     return json.loads(get_jwt_identity())["user"]
 
 
 def get_jwt_user_object():
-    username = get_jwt_user()
+    username = get_jwt_username()
     return db["USERS"].find_one({"USR_NAME": username})

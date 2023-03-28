@@ -48,19 +48,19 @@ def bank():
 @app.route("/balance", methods=("POST",))
 @jwt_required()
 def balance():
-    username = get_jwt_user()
+    username = get_jwt_username()
     return jsonify({'balance': get_balance_from_username(username)})
 
 
 @app.route("/statements", methods=("POST", "GET"))
 @jwt_required()
 def statements():
-    username = json.loads(get_jwt_identity())["user"]
+    username = get_jwt_username()
     transactions = list(db["TRANSACTIONS"].find(
         {"$or": [{'FROM': username}, {'TO': username}]},
         {'_id': False}))
     if request.method == 'POST':
-        return jsonify({'transactions': transactions})
+        return {'transactions': transactions}
     elif request.method == 'GET':
         return render_template("statements.html", transactions=transactions)
 
