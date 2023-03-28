@@ -29,7 +29,7 @@ def login():
             if query["PASS"].lower() == password.lower():
                 jwt_token = create_access_token(
                     identity=json.dumps({"user": username}))
-                res = Response(status=200)
+                res = make_response(redirect(url_for('bank')))
                 set_access_cookies(res, jwt_token)
                 return res
         else:
@@ -192,7 +192,18 @@ def signup():
 @app.route("/election/stand", methods=("POST", "GET"))
 @jwt_required()
 def election_stand():
+    username = json.loads(get_jwt_identity())["user"]
+    user = db["USERS"].find_one({"USR_NAME": username})
+
+    election = str(db["ELECTIONS"].find_one({})["_id"])
+
+    check_query = db["CANDIDATES"].find_one({
+        "CANDIDATE_ID": str(user["_id"]),
+        "ELECTION_ID": election
+    })
+
     form = ElectionStand(request.form)
+
     if form.validate():
         username = json.loads(get_jwt_identity())["user"]
         user = db["USERS"].find_one({"USR_NAME": username})
@@ -201,31 +212,46 @@ def election_stand():
             "password").encode()).hexdigest()
         pw_db = user["PASS"]
         if pw_hash != pw_db:
-            return Response(status=400)
+            return render_template("election_stand.html", error="Authentication failed")
 
-        election = db["ELECTIONS"].find({}).sort("END_DATE", -1)
-
-        check_query = db["CANDIDATES"].find_one({"CANDIDATE_ID": user["_id"]})
         if check_query is not None:
-            db["CANDIDATES"].find_one_and_delete({"CANDIDATE_ID": user["_id"]})
+            print("DELETING")
+            db["CANDIDATES"].find_one_and_delete({"CANDIDATE_ID": str(user["_id"])})
+            return render_template("election_stand.html", unlisted="Successfully withdrew")
         else:
             db["CANDIDATES"].insert_one({
                 "CANDIDATE_ID": str(user["_id"]),
-                "ELECTION_ID": str(election[0]["_id"]),
+                "ELECTION_ID": election,
                 "REGION": user["VOTE_REGION"],
                 "MANIFESTO": request.form.get("manifesto")
             })
-        return Response(status=200)
+        
+            return render_template("election_stand.html", succ="Successfully registered")
+    
+    if check_query is not None:
+        return render_template("election_stand.html", manifesto=check_query["MANIFESTO"])
 
-    return render_template("test_stand.html")
-    return Response(status=400)
+    return render_template("election_stand.html")
+
 
 
 @app.route('/election/vote', methods=("POST", "GET"))
 @jwt_required()
 def election_vote():
     username = json.loads(get_jwt_identity())["user"]
+    user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
     form = ElectionsVote(request.form, username)
+
+    candidates=form.candidate.choices
+
+    election_id = str(db["ELECTIONS"].find_one({})["_id"])
+    votes_query = db["VOTES"].find_one({
+        "VOTER_ID": str(user_id),
+        "ELECTION_ID": election_id
+    })
+    if votes_query is not None:
+        print(votes_query)
+        return render_template("election_vote.html", info="Already voted in this election", candidates=candidates)
 
     if form.validate():
         print("Form Validated")
@@ -234,7 +260,7 @@ def election_vote():
             "password").encode()).hexdigest()
         pw_db = db["USERS"].find_one({"USR_NAME": username})["PASS"]
         if pw_hash != pw_db:
-            return Response(status=400)
+            return render_template("election_vote.html", error="Failed authentication")
 
         user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
         user_state = db["USERS"].find_one(
@@ -259,7 +285,7 @@ def election_vote():
 
         return Response(status=200)
 
-    return render_template("test_vote.html", form=form)
+    return render_template("election_vote.html", candidates=candidates)
 
 
 @app.route("/election/results", methods=("POST", "GET"))
