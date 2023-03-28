@@ -18,8 +18,8 @@
     <input class="login-page-input" name="username"></input>
     <div class="login-page-head">Password</div>
     <input class="login-page-input" name="password" type="password"></input>
-    <div class="login-page-head">Confirm Password</div>
-    <input class="login-page-input" name="confirm_password" type="password"></input>
+    <div class="login-page-head login-register">Confirm Password</div>
+    <input class="login-page-input login-register" name="confirm_password" type="password"></input>
     <div class="login-page-head login-register">Account Holder Name</div>
     <input class="login-page-input login-register" name="name"></input>
     <div class="login-page-head login-register">Phone number</div>
@@ -87,7 +87,7 @@
 
     document.getElementById("login-sign-in").addEventListener("click", (e) => {
         register_only();
-        if(register){
+        if (register) {
             sendRegister();
         }
     })
@@ -108,15 +108,15 @@
         })
 
         fetch("/login", {
-            method : "POST",
-            body : formData
+            method: "POST",
+            body: formData
         }).then((res) => res.json())
-        .then((data) =>{
-            console.log(data);
-        })
+            .then((data) => {
+                sessionStorage.setItem("access-token", data);
+            })
     }
 
-    function sendRegister(){
+    function sendRegister() {
         let formData = new FormData();
         let fields = document.querySelectorAll(".login-page-input");
         fields.forEach((elem) => {
@@ -126,19 +126,23 @@
         })
 
         let acc_type = document.getElementById("login-selection");
-        if(acc_type.value == "0"){
+        if (acc_type.value == "0") {
             return
         }
-        else{
+        else {
             formData.append("account_type", acc_type.options[acc_type.selectedIndex].text.toLowerCase())
         }
 
         fetch("/signup", {
-            method : "POST",
-            body : formData
-        }).then((res) => res.json())
-        .then((data) =>{
-            console.log(data);
+            method: "POST",
+            body: formData
+        }).then((res) => {
+            if (res.ok) {
+                document.getElementById("login-sign-in").style.backgroundColor = "green";
+            }
+            else {
+                alert("registration failed")
+            }
         })
     }
 
