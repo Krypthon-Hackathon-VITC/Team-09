@@ -13,7 +13,7 @@ from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, Elections
 
 @app.route("/")
 def homepage():
-    return render_template("index.html")
+    return render_template("index.html", indexhai=True)
 
 
 @app.route("/login", methods=("POST", "GET"))

@@ -148,7 +148,12 @@
                 login_only()
             }
             else {
-                alert("registration failed")
+                const boxes = Array.from(document.getElementsByClassName("login-page-input"));
+                boxes.forEach(box => {
+                        box.style.borderBlockWidth = "2px";
+                        box.style.borderColor = "red"
+                    });
+                document.getElementById("login-sign-in").style.backgroundColor = "red";
             }
         })
     }

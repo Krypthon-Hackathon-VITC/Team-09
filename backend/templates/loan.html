@@ -55,6 +55,73 @@
                     <input type="number" class="form-control" id="asset_gold" placeholder="Rs. 0" name="assets_gold">
                 </div>
             </div>
+            <div class="form-row mt-3" style="display: flex; gap:10px;">
+                <div class="col-md-2 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="genm" value="male" checked>
+                        <label class="form-check-label" for="genm">Male</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="genf" value="female">
+                        <label class="form-check-label" for="genf">Female</label>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="married" id="marr" value="true" checked>
+                        <label class="form-check-label" for="marr">Married</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="married" id="unmarr" value="false">
+                        <label class="form-check-label" for="unmarr">Unmarried</label>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="education" id="grad" value="true" checked>
+                        <label class="form-check-label" for="grad">Graduate</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="education" id="ungrad" value="false">
+                        <label class="form-check-label" for="ungrad">Not a Graduate</label>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="self_employed" id="selfyes" value="true" checked>
+                        <label class="form-check-label" for="selfyes">Self Employed</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="self_employed" id="selfno" value="false">
+                        <label class="form-check-label" for="selfno">Not Self Employed</label>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="property_area" id="propu" value="urban" checked>
+                        <label class="form-check-label" for="propu">Urban</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="property_area" id="propr" value="rural">
+                        <label class="form-check-label" for="propr">Rural</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="dependents">Number of Dependents</label>
+                <input type="number" class="form-control" id="dependents" placeholder="n Dependents" name="dependents">
+            </div>
+            <div class="form-group">
+                <label for="inco">Income of Applicant</label>
+                <input type="number" class="form-control" id="inco" placeholder="Rs. 0" name="applicantincome">
+            </div>
+            <div class="form-group">
+                <label for="cinco">Income of Co-applicant</label>
+                <input type="number" class="form-control" id="cinco" placeholder="Rs. 0" name="coapplicantincome">
+            </div>
+
+
+
             <button type="submit" class="btn btn-primary mt-4">Submit</button>
         </form>
     </div>
