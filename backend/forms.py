@@ -2,6 +2,9 @@ from wtforms import Form, StringField, PasswordField, SubmitField, SelectField, 
 from wtforms.validators import input_required, length
 
 import re
+from bson.objectid import ObjectId
+
+from app import db
 
 class LoginForm(Form):
     username = StringField('username', validators=[input_required()])
@@ -46,3 +49,26 @@ class ComplaintForm(Form):
     subject = StringField('subject', validators=[input_required()])
     body = PasswordField('body', validators=[input_required()])
     submit = SubmitField('submit')
+
+class ElectionStand(Form):
+    manifesto = StringField('manifesto', validators=[input_required()])
+    password = PasswordField('password', validators=[input_required()])
+    stand = SubmitField('submit')
+
+class ElectionsVote(Form):
+    candidate = SelectField('candidate', validators=[input_required()])
+    password = PasswordField('password', validators=[input_required()])
+    vote = SubmitField('vote')
+
+    def __init__(self, formdata, username):
+        super(ElectionsVote, self).__init__(formdata)   
+        choices = []
+        user_voting_region = db["USERS"].find_one({"USR_NAME": username})["VOTE_REGION"]
+        candidates = db["CANDIDATES"].find({
+            "REGION": user_voting_region
+        })
+        for candidate in candidates:
+            cid = candidate["CANDIDATE_ID"]
+            cname = db["USERS"].find_one({"_id": ObjectId(cid)})["NAME"]
+            choices.append((str(cid), cname))
+        self.candidate.choices = choices
