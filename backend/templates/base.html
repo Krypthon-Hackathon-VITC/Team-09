@@ -8,15 +8,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dCorp</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.0-alpha2-dist/css/bootstrap.min.css') }}">
-    <script src="{{url_for('static', filename='bootstrap-5.3.0-alpha2-dist/js/bootstrap.min.js')}}"></script> -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.0-alpha2-dist/css/bootstrap.min.css') }}"> -->
+    <!-- <script src="{{url_for('static', filename='bootstrap-5.3.0-alpha2-dist/js/bootstrap.min.js')}}"></script> -->
     {% endblock %}
 </head>
 
 <body>
     <header>
-        <div class="header_options bank-name"><a href="">dCorp</a></div>
-        <div class="header_options">Home</div>
+        <div class="header_options bank-name"><a href="/">dCorp</a></div>
+        <div class="header_options"><a href="/dashboard">Home</a></div>
         <div class="header_options">About us</div>
         {% block more_header %} {% endblock %}
         <div class="header_options hamburger">
