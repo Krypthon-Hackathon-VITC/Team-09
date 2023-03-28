@@ -18,6 +18,7 @@
     {% endif %}
 </div>
 <div id="election-wrapper">
+    <a href="{{ url_for('election_board') }}">
     <div class="election-cards">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill"
             viewBox="0 0 16 16">
@@ -26,7 +27,9 @@
         </svg>
         <span>View Board</span>
     </div>
+    </a>
 
+    <a href="{{ url_for('election_candidates') }}">
     <div class="election-cards">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-person-fill-check" viewBox="0 0 16 16">
@@ -37,6 +40,7 @@
         </svg>
         <span>Electoral candidates</span>
     </div>
+    </a>
 
     <a href="{{ url_for('election_stand') }}">
     <div class="election-cards">

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block more_header %}
+{{ super() }}
+{% endblock %}
+
+{% block main %}
+<div class="container" style="margin-top:70px;">
+    <h1>Election Candidates</h1>
+    {% for region in cbr %}
+        <h3>{{ region }}</h3>
+        <table id="data" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Candidate ID</th>
+                    <th>State</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Account Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in cbr[region] %}
+                <tr>
+                    <td>{{ candidate['CANDIDATE_ID'] }}</td>
+                    <td>{{ candidate['REGION'] }}</td>
+                    <td>{{ candidate['CANDIDATE_INFO']['USR_NAME'] }}</td>
+                    <td>{{ candidate['CANDIDATE_INFO']['NAME'] }}</td>
+                    <td>{{ candidate['CANDIDATE_INFO']['BALANCE'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+</div>
+{% endblock %}

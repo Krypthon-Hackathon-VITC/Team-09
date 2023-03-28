@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block more_header %}
+{{ super() }}
+{% endblock %}
+
+{% block main %}
+<div class="container" style="margin-top:70px;">
+    <h1>Board Members</h1>
+    <table id="data" class="table table-striped">
+        <thead>
+            <tr>
+                <th>Candidate ID</th>
+                <th>State</th>
+                <th>Username</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td>{{ member['_id'] }}</td>
+                <td>{{ member['VOTE_REGION'] }}</td>
+                <td>{{ member['USR_NAME'] }}</td>
+                <td>{{ member['NAME'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

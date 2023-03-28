@@ -4,6 +4,9 @@ from flask import jsonify, render_template, Response, request, \
 from flask_jwt_extended import create_access_token, get_jwt_identity, \
     jwt_required, set_access_cookies, get_jwt
 from helper import *
+from collections import defaultdict
+import pprint
+pp = pprint.PrettyPrinter(indent=1)
 
 import datetime
 import hashlib
@@ -211,6 +214,33 @@ def signup():
         return Response(status=200)
     return Response(status=411)
 
+@app.route("/election/board", methods=("GET",))
+@jwt_required()
+def election_board():
+    members = db['USERS'].find({"USR_TYPE": "board_member"})
+    return render_template("election_board.html", members=members)
+
+@app.route("/election/candidates", methods=("GET",))
+@jwt_required()
+def election_candidates():
+    election_latest = db["ELECTIONS"].find_one()
+    candidates = list(db["CANDIDATES"].find({
+        "ELECTION_ID": str(election_latest["_id"])
+    }))
+    regions = set()
+    for i in range(len(candidates)):
+        candidate_info = db["USERS"].find_one({
+            "_id" : ObjectId(candidates[i]["CANDIDATE_ID"])
+        })
+        candidates[i]['CANDIDATE_INFO'] = candidate_info
+        regions.add(candidates[i]['REGION'])
+
+    regions = list(regions)
+    candidates_by_region = defaultdict(list)
+    for region in regions:
+        candidates_by_region[region].extend(filter(lambda x: x['REGION'] == region, candidates))
+
+    return render_template("election_candidates.html", cbr=candidates_by_region)
 
 @app.route("/election/stand", methods=("POST", "GET"))
 @jwt_required()
