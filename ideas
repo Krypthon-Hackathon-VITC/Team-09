@@ -1,0 +1,62 @@
+# Ideas
+
+Model (Scikit)
+    Dataset (kaggle)
+    Aim
+        Predict price of propery (asset)
+            the asset prediction model predicts the future price of the commodity
+        Calculate credit score based on past transactions
+            the price difference of commodities will be fed in to this model, also the previous models will be fed
+
+Bank Frontend (HTML CSS JS)
+    Homepage
+    Dashboard
+        Balance
+        Statements
+        Transfer/Withdraw
+        Election
+        Feed
+        Raise a complaint (to board rep optional)
+        Apply Loan
+            Asset declaration
+                Evaluation
+                Calculate
+            Aproval Status
+            Repay
+
+    Dashboard (Board)
+        Raise issue
+        Forum
+
+Data Base (MongoDB)
+    User Database
+        User ID
+        Name
+        Username
+        Password hash
+        Phone
+        PAN
+        Account Type
+        is Board member?
+
+    Transaction Database
+        Transaction ID
+        Time
+        From
+        To
+        Amount
+        Remark
+    
+    Loan Database
+        Loan ID
+        User ID
+        Apply Time
+        Approve Time
+        Time Duration
+        Interest round(random(0, 100) * 100, 2)
+        Loan Type
+        Assets
+        Evaluation Score / Confidence
+        Aproved Status
+
+Board (Database flag different dashboard)
