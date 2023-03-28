@@ -1,4 +1,4 @@
-import pickle
+import joblib
 import pandas as pd
 
 from sklearn.ensemble import HistGradientBoostingRegressor
@@ -85,7 +85,10 @@ def train():
     MODEL.train(FEATURES, TARGETS)
     # print accuracy
     print("[ % ] SCORE IS", MODEL.score(FEATURES, TARGETS))
+    print(type(MODEL.MODELS[MODEL.ACCURATE_MODEL]))
+    # exit(0)
     # open a file and save the pickle of model
-    MODEL_FILE = open("MODEL.pkl", "wb")
-    pickle.dump(MODEL, MODEL_FILE)
+    joblib.dump(MODEL.MODELS[MODEL.ACCURATE_MODEL], "MODEL.pkl")
     
+
+train()

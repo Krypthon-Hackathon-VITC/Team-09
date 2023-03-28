@@ -1,5 +1,5 @@
 import os
-import pickle
+import joblib
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
@@ -16,12 +16,12 @@ app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 jwt = JWTManager(app)
 
 mongo_uri = os.environ.get("MONGO_URI") or "mongo-uri"
+model_path = os.environ.get("MODEL_PATH")
 
 maxSevSelDelay=1000
 mongodb = MongoClient(mongo_uri, serverSelectionTimeoutMS=maxSevSelDelay)
 db = mongodb['BANK_DATA']
 
-with open('../model/MODEL.pkl', 'rb') as f:
-    MODEL = pickle.load(f)
+MODEL = joblib.load(model_path)
 
 import endpoints

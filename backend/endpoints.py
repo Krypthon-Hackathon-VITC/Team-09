@@ -309,8 +309,6 @@ def loan():
         "SELF_EMPLOYED": request.form.get("self_employed"),
         "APPLICANTINCOME": request.form.get("applicantincome"),
         "COAPPLICANTINCOME": request.form.get("coapplicantincome"),
-        "LOANAMOUNT": request.form.get("loanamount"),
-        "LOAN_AMOUNT_TERM": request.form.get("loan_amount_term"),
         "PROPERTY_AREA": request.form.get("property_area"),
     })
 
@@ -331,8 +329,8 @@ def predict_loan():
                 request.form.get("self_employed"),
                 request.form.get("applicantincome"),
                 request.form.get("coapplicantincome"),
-                request.form.get("loanamount"),
-                request.form.get("loan_amount_term"),
+                request.form.get("amount"),
+                request.form.get("time_duration"),
                 request.form.get("property_area")
             ]
         ]
