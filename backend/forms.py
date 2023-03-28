@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, PasswordField, SubmitField, SelectField, ValidationError
+from wtforms import Form, StringField, PasswordField, SubmitField, SelectField, ValidationError, IntegerField, RadioField
 from wtforms.validators import input_required, length
 
 import re
@@ -73,7 +73,42 @@ class ElectionsVote(Form):
             choices.append((str(cid), cname))
         self.candidate.choices = choices
 
-class LoanFormPredict(Form):
-    gender = StringField('gender', validators=[input_required()])
+class LoanForm(Form):
+    time_duration = IntegerField("time_duration", validators=[input_required()])
+    amount = IntegerField("time_duration", validators=[input_required()])
+    l_type = SelectField("l_type", choices=[
+        ("home", "Home Loan"),
+        ("business", "Business Loan"),
+        ("car", "Car Loan"),
+        ("personal", "Personal Loan")
+    ], validators=[input_required()])
+    assets_housing = IntegerField("assets_housing", validators=[input_required()])
+    assets_car = IntegerField("assets_car", validators=[input_required()])
+    assets_gold = IntegerField("assets_gold", validators=[input_required()])
+    gender = RadioField('gender', choices=[
+        ("male", "Male"),
+        ("female", "Female")
+    ], validators=[input_required()])
+    married = RadioField('married', choices=[
+        ("true", "Married"),
+        ("false", "Unmarried")
+    ], validators=[input_required()])
 
-    
+    education = RadioField('education', choices=[
+        ("true", "Graduate"),
+        ("false", "Not a Graduate")
+    ], validators=[input_required()])
+
+    self_employed = RadioField('self_employed', choices=[
+        ("true", "Self Employed"),
+        ("false", "Not Self Employed")
+    ], validators=[input_required()])
+
+    property_area = RadioField('property_area', choices=[
+        ("urban", "Urban"),
+        ("rural", "Rural")
+    ], validators=[input_required()])
+
+    dependents = IntegerField("dependents", validators=[input_required()])
+    applicantincome = IntegerField("applicantincome", validators=[input_required()])
+    coapplicantincome = IntegerField("coapplicantincome", validators=[input_required()])

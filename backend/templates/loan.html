@@ -22,6 +22,11 @@
                 Successfuly submitted Loan Application.
             </div>
         {% endif %}
+        {% if not eligible %}
+            <div class="alert alert-danger" role="alert">
+                Loan application got rejected.
+            </div>
+        {% endif %}
         <h1>Loan Request</h1>
         <form action="/loan" method="POST">
             <div class="form-group">

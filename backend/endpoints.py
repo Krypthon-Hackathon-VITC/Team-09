@@ -8,7 +8,7 @@ from helper import *
 import hashlib
 
 from app import app, db, mongodb, MODEL
-from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanFormPredict
+from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanForm
 
 
 @app.route("/")
@@ -282,10 +282,15 @@ def election_results():
 def loan():
     if request.method == 'GET':
         success = request.args.get('success') or False
-        return render_template("loan.html", success=success)
+        eligible = request.args.get('eligible') or "1"
+        eligible = eligible == "1"
+        print(eligible)
+        return render_template("loan.html", success=success, eligible=eligible)
 
     user = json.loads(get_jwt_identity())["user"]
 
+    form = LoanForm()
+    # if form.validate():
     db["LOANS"].insert_one({
         'USR_NAME': user,
         'APPLICATION_DATE': datetime.datetime.now(),
@@ -312,26 +317,42 @@ def loan():
         "PROPERTY_AREA": request.form.get("property_area"),
     })
 
-    return redirect(url_for('loan', success=True))
-
-
-@app.route("/predict", methods=("POST",))
-@jwt_required()
-def predict_loan():
-    form = LoanFormPredict(request.form)
-    if form.validate():
-        features = [
-            [
-                request.form.get("gender"),
-                request.form.get("married"),
-                request.form.get("dependents"),
-                request.form.get("education"),
-                request.form.get("self_employed"),
-                request.form.get("applicantincome"),
-                request.form.get("coapplicantincome"),
-                request.form.get("amount"),
-                request.form.get("time_duration"),
-                request.form.get("property_area")
-            ]
+    features = [
+        [
+            request.form.get("gender") == "male",
+            request.form.get("married") == "true",
+            request.form.get("dependents") if int(request.form.get(
+                "dependents")) < 3 else 3,
+            request.form.get("education") == "true",
+            request.form.get("self_employed") == "true",
+            int(request.form.get("applicantincome"))/80,
+            int(request.form.get("coapplicantincome"))/80,
+            int(request.form.get("amount"))/80,
+            int(request.form.get("time_duration")) * 365,
+            request.form.get("property_area") == "urban"
         ]
-        print(MODEL.predict(features))
+    ]
+
+    print(features)
+    flag = MODEL.predict(features)
+    print(flag)
+
+    flag = flag[0] > 0.6
+
+    p = int(request.form.get("amount"))
+    n = int(request.form.get("time_duration"))
+    r = 0.08
+
+    # ci = int(request.form.get("amount"))*((1+0.08) **
+    #                                       (int(request.form.get("time_duration"))))
+    # ei = int(request.form.get("applicantincome")) * \
+    #     ((1+0.04)**(int(request.form.get("time_duration"))))
+    # P x R x (1+R)^N / [(1+R)^N-1]
+    ci = (p*r*(1+r)**n)/((1+r)**(n-1))
+    ei = int(request.form.get("applicantincome")) - 0.1*int(request.form.get("applicantincome"))
+
+    print(ci, ei, flag)
+    if ci > ei:
+        flag = False
+    flag = int(flag)
+    return redirect(url_for('loan', success=True, eligible=flag))
