@@ -72,3 +72,6 @@ class ElectionsVote(Form):
             cname = db["USERS"].find_one({"_id": ObjectId(cid)})["NAME"]
             choices.append((str(cid), cname))
         self.candidate.choices = choices
+
+class LoanForm(Form):
+    pass
