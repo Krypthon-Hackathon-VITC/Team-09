@@ -9,7 +9,7 @@ import hashlib
 import json
 import uuid
 
-from app import app, db, mongodb, MODEL
+from app import app, db, mongodb, MODEL, jwt
 from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, \
                   ElectionsVote, LoanForm, TransferForm
 
@@ -394,3 +394,7 @@ def loan():
         flag = False
     flag = int(flag)
     return redirect(url_for('loan', success=True, eligible=flag))
+
+@jwt.unauthorized_loader
+def unauthorized_jwt_token(message="JWT Auth failed"):
+    return render_template('jwt_unauthorized.html')
