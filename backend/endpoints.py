@@ -46,7 +46,7 @@ def balance():
     username = json.loads(get_jwt_identity())["user"]
     return jsonify({'balance': get_balance(username)})
 
-@app.route("/statements", methods=("POST", "GET"))
+@app.route("/dashboard/statements", methods=("POST", "GET"))
 @jwt_required()
 def statements():
     username = json.loads(get_jwt_identity())["user"]
@@ -58,7 +58,7 @@ def statements():
     elif request.method == 'GET':
         return render_template("statements.html", transactions=transactions)
 
-@app.route("/transfer", methods=("GET", "POST"))
+@app.route("/dashboard/transfer", methods=("GET", "POST"))
 @jwt_required()
 def transfer():
     if request.method == 'GET':
