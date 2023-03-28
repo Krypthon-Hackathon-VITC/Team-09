@@ -63,7 +63,8 @@ def statements():
 def transfer():
     if request.method == 'GET':
         success = request.args.get('success') or False
-        return render_template("transfer.html", success=success)
+        error = request.args.get('error') or False
+        return render_template("transfer.html", success=success, error=error)
 
     user_from = json.loads(get_jwt_identity())["user"]
 
@@ -71,12 +72,14 @@ def transfer():
     amount = int(request.form.get("amount"))
     remark = request.form.get("remark") or ''
 
-    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0: return Response(status=400)
+    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0:
+        return redirect(url_for('transfer', error=True))
+
     from_bal = get_balance(user_from)
     to_bal = get_balance(user_to)
 
     if amount > from_bal:
-        return Response(status=400)
+        return redirect(url_for('transfer', error=True))
 
     with mongodb.start_session() as session:
         with session.start_transaction():

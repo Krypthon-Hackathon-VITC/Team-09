@@ -15,7 +15,12 @@
     <div class="container" style="margin-top:50px;">
         {% if success %}
             <div class="alert alert-success" role="alert">
-                Payment Success!
+                Payment Success! 😇
+            </div>
+        {% endif %}
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                Payment Failed! 🤡
             </div>
         {% endif %}
         <h1>Transfer Money</h1>
