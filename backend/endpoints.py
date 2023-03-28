@@ -13,7 +13,7 @@ from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, Elections
 
 @app.route("/")
 def homepage():
-    return render_template("index.html")
+    return render_template("index.html", indexhai=True)
 
 
 @app.route("/login", methods=("POST", "GET"))
@@ -309,8 +309,6 @@ def loan():
         "SELF_EMPLOYED": request.form.get("self_employed"),
         "APPLICANTINCOME": request.form.get("applicantincome"),
         "COAPPLICANTINCOME": request.form.get("coapplicantincome"),
-        "LOANAMOUNT": request.form.get("loanamount"),
-        "LOAN_AMOUNT_TERM": request.form.get("loan_amount_term"),
         "PROPERTY_AREA": request.form.get("property_area"),
     })
 

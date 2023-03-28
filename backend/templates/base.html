@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.3.0-alpha2-dist/css/bootstrap.min.css') }}"> -->
     <!-- <script src="{{url_for('static', filename='bootstrap-5.3.0-alpha2-dist/js/bootstrap.min.js')}}"></script> -->
+    <style>
+        .login {
+            right: 0;
+            position: fixed;
+            border-radius: 30px;
+            border: 2px solid white;
+            padding: 10px;
+            margin: 30px;
+            text-align: center;
+        }
+        .login:hover {
+            background-color: white;
+            color: black;
+        }
+    </style>
     {% endblock %}
 </head>
 
@@ -19,13 +34,9 @@
         <div class="header_options"><a href="/dashboard">Home</a></div>
         <div class="header_options">About us</div>
         {% block more_header %} {% endblock %}
-        <div class="header_options hamburger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list"
-                viewBox="0 0 16 16">
-                <path fill-rule="evenodd"
-                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
-            </svg>
-        </div>
+        {% if not indexhai %}
+            <div class="header_options login" id="login_header" style="position:absolute; right:0;">Sign out</div>
+        {% endif %}
     </header>
     <div class="main">
         {% block main %}
