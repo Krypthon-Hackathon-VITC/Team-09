@@ -40,9 +40,8 @@ def login():
 @app.route("/dashboard")
 @jwt_required()
 def bank():
-    username = json.loads(get_jwt_identity())["user"]
-    query = db["USERS"].find_one({"USR_NAME": username})
-    role = query["USR_TYPE"]
+    user = get_jwt_user_object()
+    role = user["USR_TYPE"]
     return render_template("dashboard.html", role=role)
 
 
