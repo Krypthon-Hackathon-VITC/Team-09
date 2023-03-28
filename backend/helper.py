@@ -20,6 +20,12 @@ def check_password_hash(password: str, hash: str):
     return False
 
 
+def verify_password_jwt(password: str):
+    user = get_jwt_user_object()
+    hash = user["PASS"]
+    return check_password_hash(password, hash)
+
+
 def get_jwt_username():
     return json.loads(get_jwt_identity())["user"]
 

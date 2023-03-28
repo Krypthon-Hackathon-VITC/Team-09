@@ -251,45 +251,43 @@ def election_candidates():
 @app.route("/election/stand", methods=("POST", "GET"))
 @jwt_required()
 def election_stand():
-    username = json.loads(get_jwt_identity())["user"]
-    user = db["USERS"].find_one({"USR_NAME": username})
-
-    election = str(db["ELECTIONS"].find_one({})["_id"])
+    form = ElectionStand(request.form)
+    username = get_jwt_username()
+    user = get_jwt_user_object()
+    election_id = db["ELECTIONS"].find_one({})["_id"]
 
     check_query = db["CANDIDATES"].find_one({
-        "CANDIDATE_ID": str(user["_id"]),
-        "ELECTION_ID": election
+        "CANDIDATE_ID": user["_id"],
+        "ELECTION_ID": election_id
     })
-
-    form = ElectionStand(request.form)
-
     if form.validate():
-        username = json.loads(get_jwt_identity())["user"]
-        user = db["USERS"].find_one({"USR_NAME": username})
+        manifesto = form["manifesto"].data
+        password = form["password"].data
 
-        pw_hash = hashlib.sha256(request.form.get(
-            "password").encode()).hexdigest()
-        pw_db = user["PASS"]
-        if pw_hash != pw_db:
-            return render_template("election_stand.html", error="Authentication failed")
+        if not verify_password_jwt(password):
+            print("Pass fail")
+            return render_template("election_stand.html",
+                                   error="Authentication failed")
 
         if check_query is not None:
-            print("DELETING")
             db["CANDIDATES"].find_one_and_delete(
-                {"CANDIDATE_ID": str(user["_id"])})
-            return render_template("election_stand.html", unlisted="Successfully withdrew")
+                {"CANDIDATE_ID": user["_id"]})
+            return render_template("election_stand.html", 
+                                   unlisted="Successfully withdrew")
         else:
             db["CANDIDATES"].insert_one({
-                "CANDIDATE_ID": str(user["_id"]),
-                "ELECTION_ID": election,
+                "CANDIDATE_ID": user["_id"],
+                "ELECTION_ID": election_id,
                 "REGION": user["VOTE_REGION"],
-                "MANIFESTO": request.form.get("manifesto")
+                "MANIFESTO": manifesto
             })
 
-            return render_template("election_stand.html", succ="Successfully registered")
+            return render_template("election_stand.html",
+                                   success="Successfully registered")
 
     if check_query is not None:
-        return render_template("election_stand.html", manifesto=check_query["MANIFESTO"])
+        manifesto = check_query["MANIFESTO"]
+        return render_template("election_stand.html", manifesto=manifesto)
 
     return render_template("election_stand.html")
 
