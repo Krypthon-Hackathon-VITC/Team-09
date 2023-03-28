@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js" integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N" crossorigin="anonymous"></script>
+<style>
+label {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block more_header %}
+{{ super() }}
+{% endblock %}
+
+{% block main %}
+<div class="container" style="margin-top:70px;">
+    <h1>List of Transactions</h1>
+    <table id="data" class="table table-striped" style="width=100px;">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Date</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Amount</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td data-sort="{{transaction['TIME']}}">
+                    {{ transaction['TIME'].strftime('%H:%M') }}
+                </td>
+                <td>{{ transaction['TIME'].strftime('%Y-%m-%d') }}</td>
+                <td>{{ transaction['FROM'] }}</td>
+                <td>{{ transaction['TO'] }}</td>
+                <td>{{ transaction['AMOUNT'] }}</td>
+                <td>{{ transaction['REMARK'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block below_body %}
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#data').DataTable({
+                    order: [[0, 'desc']],
+                });
+        });
+    </script>
+{% endblock %}
