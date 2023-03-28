@@ -170,7 +170,7 @@ def signup():
         pincode = request.form["pin"]
         pin_query = db["PINCODE"].find_one({"Pincode": pincode})
         if pin_query is None:
-            return Response(status=400)
+            return Response(status=410)
 
         db["USERS"].insert_one({
             'USR_NAME': request.form["username"],
@@ -186,7 +186,7 @@ def signup():
         })
 
         return Response(status=200)
-    return Response(status=400)
+    return Response(status=411)
 
 
 @app.route("/election/stand", methods=("POST", "GET"))

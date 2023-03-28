@@ -12,28 +12,29 @@
 
 {% block main %}
 <img src="{{ url_for('static', filename='dCorp-l.jpg') }}" alt="">
-<h1>About us</h1>
-<p>
-    We are dCorp.
+<h1 class="content">About us</h1>
+<p class="content">
+    We are dCorp, the Digital Cooperative Bank. Each account holder is a stakeholder and is equally.
 </p>
 
+<div id="login-page-blur"></div>
 <div id="login-page">
     <div class="login-page-head"></div>
-    <div class="login-page-head">Username</div>
+    <div class="login-page-head">Username&nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input" name="username"></input>
-    <div class="login-page-head">Password</div>
+    <div class="login-page-head">Password &nbsp;<span style="color: red;">*</span> (min length 8)<br>1 uppercase, 1 number and 1 speacial character</div>
     <input class="login-page-input" name="password" type="password"></input>
-    <div class="login-page-head login-register">Confirm Password</div>
+    <div class="login-page-head login-register">Confirm Password &nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input login-register" name="confirm_password" type="password"></input>
-    <div class="login-page-head login-register">Account Holder Name</div>
+    <div class="login-page-head login-register">Account Holder Name &nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input login-register" name="name"></input>
-    <div class="login-page-head login-register">Phone number</div>
+    <div class="login-page-head login-register">Phone number &nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input login-register" name="phone"></input>
-    <div class="login-page-head login-register">PAN</div>
+    <div class="login-page-head login-register">PAN &nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input login-register" name="pan"></input>
-    <div class="login-page-head login-register">Pincode</div>
+    <div class="login-page-head login-register">Pincode &nbsp;<span style="color: red;">*</span></div>
     <input class="login-page-input login-register" name="pin"></input>
-    <div class="login-page-head login-register">Account Type</div>
+    <div class="login-page-head login-register">Account Type &nbsp;<span style="color: red;">*</span></div>
     <select id="login-selection" class="login-register">
         <option value="0" selected>Select Type</option>
         <option value="1">Savings</option>
@@ -43,6 +44,7 @@
     <div id="login-sign-in" class="login-button">Register</div>
     <div id="login-login-lower" class="login-button">Login</div>
 </div>
+
 {% endblock %}
 
 {% block below_body %}
@@ -59,6 +61,7 @@
         button_reg.style.display = "block";
         button_reg.style.backgroundColor = "white";
         button_reg.style.color = "black";
+        document.getElementById("login-page").style.marginTop = "-300px";
 
         document.querySelectorAll(".login-register").forEach((x) => {
             x.style.display = "none";
@@ -73,6 +76,7 @@
         button.style.color = "white";
         document.getElementById("login-login-upper").style.display = "none";
         let button_reg = document.getElementById("login-login-lower");
+        document.getElementById("login-page").style.marginTop = "-370px";
         button_reg.style.display = "block";
 
         document.querySelectorAll(".login-register").forEach((x) => {
@@ -81,9 +85,11 @@
     }
 
     login_only()
+    document.querySelector("#login-page-blur").style.display = "none";
 
     document.getElementById("login_header").addEventListener("click", (e) => {
         document.getElementById("login-page").style.display = "flex";
+        document.querySelector("#login-page-blur").style.display = "initial";
     })
 
     document.getElementById("login-login-lower").addEventListener("click", (e) => {
@@ -98,8 +104,12 @@
     })
 
     document.getElementById("login-login-upper").addEventListener("click", (e) => {
-        console.log("yo");
         sendLogin();
+    })
+
+    document.getElementById("login-page-blur").addEventListener("click", (e) => {
+        document.querySelector("#login-page-blur").style.display = "none";
+        document.getElementById("login-page").style.display = "none";
     })
 
     function sendLogin() {
@@ -116,10 +126,10 @@
             method: "POST",
             body: formData
         }).then((res) => {
-                if(res.ok){
-                    window.location.href = "/dashboard";
-                }
-            })
+            if (res.ok) {
+                window.location.href = "/dashboard";
+            }
+        })
     }
 
     function sendRegister() {
@@ -139,6 +149,26 @@
             formData.append("account_type", acc_type.options[acc_type.selectedIndex].text.toLowerCase())
         }
 
+        let passwd, cnf_passwd;
+        let all_elem = document.getElementsByClassName("login-page-input");
+        [...all_elem].forEach(element => {
+            if (element.getAttribute("name") == "password") {
+                passwd = element;
+            }
+            else if(element.getAttribute("name") == "confirm_password"){
+                cnf_passwd = element;
+            }
+        });
+
+        if(passwd.value != cnf_passwd.value){
+            [...all_elem].forEach(element => {
+                element.style.borderColor = "grey";
+            })
+            passwd.style.borderColor = "red";
+            cnf_passwd.style.borderColor = "red";
+            return
+        }
+
         fetch("/signup", {
             method: "POST",
             body: formData
@@ -147,13 +177,33 @@
                 document.getElementById("login-sign-in").style.backgroundColor = "green";
                 login_only()
             }
+            else if (res.status == 410) {
+                [...all_elem].forEach(element => {
+                    if (element.getAttribute("name") == "pin") {
+                        element.style.borderColor = "red"
+                    }
+                    else {
+                        element.style.borderColor = "grey"
+                    }
+                });
+            }
+            else if (res.status == 400) {
+                [...all_elem].forEach(element => {
+                    if (element.getAttribute("name") == "username" || element.getAttribute("name") == "password") {
+                        element.style.borderColor = "red";
+                    }
+                    else {
+                        element.style.borderColor = "grey";
+                    }
+                });
+            }
             else {
-                const boxes = Array.from(document.getElementsByClassName("login-page-input"));
-                boxes.forEach(box => {
-                        box.style.borderBlockWidth = "2px";
-                        box.style.borderColor = "red"
-                    });
-                document.getElementById("login-sign-in").style.backgroundColor = "red";
+                [...all_elem].forEach(box => {
+                    if(["username", "password", "confirm_password", "pin"].indexOf(box.getAttribute("name")) == -1)
+                        box.style.borderColor = "red";
+                    else
+                        box.style.borderColor = "grey";
+                });
             }
         })
     }
