@@ -48,8 +48,8 @@ def bank():
 @app.route("/balance", methods=("POST",))
 @jwt_required()
 def balance():
-    username = json.loads(get_jwt_identity())["user"]
-    return jsonify({'balance': get_balance(username)})
+    username = get_jwt_user()
+    return jsonify({'balance': get_balance_from_username(username)})
 
 
 @app.route("/statements", methods=("POST", "GET"))
@@ -82,8 +82,8 @@ def transfer():
     if db["USERS"].count_documents({'USR_NAME': user_to}) == 0:
         return redirect(url_for('transfer', error=True))
 
-    from_bal = get_balance(user_from)
-    to_bal = get_balance(user_to)
+    from_bal = get_balance_from_username(user_from)
+    to_bal = get_balance_from_username(user_to)
 
     if amount > from_bal:
         return redirect(url_for('transfer', error=True))
