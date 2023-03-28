@@ -23,10 +23,10 @@
         <tbody>
             {% for member in members %}
             <tr>
-                <td>{{ member['_id'] }}</td>
-                <td>{{ member['VOTE_REGION'] }}</td>
-                <td>{{ member['USR_NAME'] }}</td>
-                <td>{{ member['NAME'] }}</td>
+                <td>{{ member._id }}</td>
+                <td>{{ member.VOTE_REGION }}</td>
+                <td>{{ member.USR_NAME }}</td>
+                <td>{{ member.NAME }}</td>
             </tr>
             {% endfor %}
         </tbody>

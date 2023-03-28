@@ -220,11 +220,13 @@ def signup():
         return Response(status=200)
     return Response(status=411)
 
+
 @app.route("/election/board", methods=("GET",))
 @jwt_required()
 def election_board():
     members = db['USERS'].find({"USR_TYPE": "board_member"})
     return render_template("election_board.html", members=members)
+
 
 @app.route("/election/candidates", methods=("GET",))
 @jwt_required()
@@ -252,9 +254,8 @@ def election_candidates():
 @jwt_required()
 def election_stand():
     form = ElectionStand(request.form)
-    username = get_jwt_username()
     user = get_jwt_user_object()
-    election_id = db["ELECTIONS"].find_one({})["_id"]
+    election_id = db["ELECTIONS"].find_one()["_id"]
 
     check_query = db["CANDIDATES"].find_one({
         "CANDIDATE_ID": user["_id"],
@@ -295,52 +296,42 @@ def election_stand():
 @app.route('/election/vote', methods=("POST", "GET"))
 @jwt_required()
 def election_vote():
-    username = json.loads(get_jwt_identity())["user"]
-    user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
+    username = get_jwt_username()
     form = ElectionsVote(request.form, username)
 
+    user = get_jwt_user_object()
     candidates = form.candidate.choices
+    election_id = db["ELECTIONS"].find_one()["_id"]
 
-    election_id = str(db["ELECTIONS"].find_one({})["_id"])
     votes_query = db["VOTES"].find_one({
-        "VOTER_ID": str(user_id),
+        "VOTER_ID": user["_id"],
         "ELECTION_ID": election_id
     })
     if votes_query is not None:
-        print(votes_query)
-        return render_template("election_vote.html", info="Already voted in this election", candidates=candidates)
+        return render_template("election_vote.html",
+                               info="Already voted in this election",
+                               candidates=candidates)
 
     if form.validate():
-        print("Form Validated")
+        candidate = form["candidate"].data
+        password = form["password"].data
+        if not verify_password_jwt(password):
+            return render_template("election_vote.html",
+                                   error="Failed authentication")
 
-        pw_hash = hashlib.sha256(request.form.get(
-            "password").encode()).hexdigest()
-        pw_db = db["USERS"].find_one({"USR_NAME": username})["PASS"]
-        if pw_hash != pw_db:
-            return render_template("election_vote.html", error="Failed authentication")
-
-        user_id = db["USERS"].find_one({"USR_NAME": username})["_id"]
-        user_state = db["USERS"].find_one(
-            {"USR_NAME": username})["VOTE_REGION"]
-
-        election_id = str(db["ELECTIONS"].find_one({})["_id"])
-        votes_query = db["VOTES"].find_one({
-            "VOTER_ID": str(user_id),
-            "ELECTION_ID": election_id
-        })
-        if votes_query is not None:
-            print(votes_query)
-            return Response(status=400)
+        user_id = user["_id"]
+        user_state = user["VOTE_REGION"]
 
         db["VOTES"].insert_one({
-            "VOTER_ID": str(user_id),
-            "CANDIDATE_ID": request.form["candidate"],
+            "VOTER_ID": user_id,
+            "CANDIDATE_ID": ObjectId(candidate),
             "ELECTION_ID": election_id,
             "STATE": user_state,
             "TIME": datetime.datetime.now()
         })
 
-        return Response(status=200)
+        return render_template("election_vote.html", candidates=candidates, 
+                               success="Successfully voted!")
 
     return render_template("election_vote.html", candidates=candidates)
 
