@@ -117,15 +117,15 @@ def transfer():
     return render_template("transfer.html")
 
 
-@app.route("/election", methods=("GET", "POST"))
+@app.route("/election")
 def election():
     query = db["ELECTIONS"].find_one()
     if query is not None:
         election_date = query["ANNOUNCEMENT_DATE"]
         election_date = election_date.strftime("%d %b, %Y %H:%M:%S")
         return render_template("election.html", next_election=election_date)
-    else:
-        return ''
+
+    return render_template("election.html")
 
 
 @app.route("/complaint", methods=("GET", "POST"))
