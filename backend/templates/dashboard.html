@@ -73,11 +73,16 @@
 
 {% block below_body %}
 <script>
-    fetch("/balance", {
-        method : "POST"
-    }).then((res)=> res.json())
-    .then((data) => {
-        document.getElementById("dashboard-balance").innerHTML = '\u20B9'+data["balance"];
+    const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'INR'
     })
+
+    fetch("/balance", {
+        method: "POST"
+    }).then((res) => res.json())
+            .then((data) => {
+                document.getElementById("dashboard-balance").innerHTML = formatter.format(data["balance"]);
+            })
 </script>
 {% endblock %}
