@@ -1,5 +1,7 @@
 Flask==2.0.3
 Flask_JWT_Extended==4.4.4
+pandas==1.5.3
 pymongo==4.3.3
 python-dotenv==1.0.0
+scikit_learn==1.2.2
 WTForms==3.0.1
