@@ -45,15 +45,23 @@ class SignupForm(Form):
             raise ValidationError("Invalid phone number")
 
 
+class TransferForm(Form):
+    user_to = StringField('user_to', validators=[input_required()])
+    amount = IntegerField('amount', validators=[input_required()])
+    remark = StringField('remark')
+    submit = SubmitField('submit')
+
 class ComplaintForm(Form):
     subject = StringField('subject', validators=[input_required()])
     body = PasswordField('body', validators=[input_required()])
     submit = SubmitField('submit')
 
+
 class ElectionStand(Form):
     manifesto = StringField('manifesto', validators=[input_required()])
     password = PasswordField('password', validators=[input_required()])
     stand = SubmitField('submit')
+
 
 class ElectionsVote(Form):
     candidate = SelectField('candidate', validators=[input_required()])
@@ -72,6 +80,7 @@ class ElectionsVote(Form):
             cname = db["USERS"].find_one({"_id": ObjectId(cid)})["NAME"]
             choices.append((str(cid), cname))
         self.candidate.choices = choices
+
 
 class LoanForm(Form):
     time_duration = IntegerField("time_duration", validators=[input_required()])

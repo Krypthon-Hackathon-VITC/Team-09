@@ -1,5 +1,7 @@
-from flask import jsonify, render_template, Response, request, make_response, url_for, redirect
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies
+from flask import jsonify, render_template, Response, request, \
+                  make_response, url_for, redirect
+from flask_jwt_extended import create_access_token, get_jwt_identity, \
+                               jwt_required, set_access_cookies
 from helper import *
 
 import datetime
@@ -8,7 +10,8 @@ import json
 import uuid
 
 from app import app, db, mongodb, MODEL
-from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanForm
+from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, \
+                  ElectionsVote, LoanForm, TransferForm
 
 
 @app.route("/")
@@ -20,8 +23,8 @@ def homepage():
 def login():
     form = LoginForm(request.form)
     if form.validate():
-        username = request.form["username"]
-        password = request.form.get("password")
+        username = form["username"].data
+        password = form["password"].data
         query = db["USERS"].find_one({"USR_NAME": username})
         if query is not None:
             hash = query["PASS"]
@@ -49,7 +52,7 @@ def bank():
 @jwt_required()
 def balance():
     username = get_jwt_username()
-    return jsonify({'balance': get_balance_from_username(username)})
+    return {'balance': get_balance_from_username(username)}
 
 
 @app.route("/statements", methods=("POST", "GET"))
@@ -68,41 +71,50 @@ def statements():
 @app.route("/transfer", methods=("GET", "POST"))
 @jwt_required()
 def transfer():
-    if request.method == 'GET':
-        success = request.args.get('success') or False
-        error = request.args.get('error') or False
-        return render_template("transfer.html", success=success, error=error)
+    form = TransferForm(request.form)
 
-    user_from = json.loads(get_jwt_identity())["user"]
+    if form.validate():
+        user_from = get_jwt_username()
+        user_to = form["user_to"].data
+        amount = form["amount"].data
+        remark = form["remark"].data
 
-    user_to = request.form.get("user_to")
-    amount = int(request.form.get("amount"))
-    remark = request.form.get("remark") or ''
+        if user_to == user_from:
+            return render_template('transfer.html', error="Cannot transfer \
+                                                           money to self!")
 
-    if db["USERS"].count_documents({'USR_NAME': user_to}) == 0:
-        return redirect(url_for('transfer', error=True))
+        if amount <= 0:
+            return render_template('transfer.html', error="Amount cannot be \
+                                                           negative or zero!")
 
-    from_bal = get_balance_from_username(user_from)
-    to_bal = get_balance_from_username(user_to)
+        check_user_to_query = db["USERS"].find_one({"USR_NAME": user_to})
+        if check_user_to_query is None:
+            return render_template('transfer.html', error="User does not exist!")
 
-    if amount > from_bal:
-        return redirect(url_for('transfer', error=True))
+        from_bal = get_balance_from_username(user_from)
+        to_bal = get_balance_from_username(user_to)
 
-    with mongodb.start_session() as session:
-        with session.start_transaction():
-            db["USERS"].update_one({'USR_NAME': user_from},
-                                   {'$set': {'BALANCE': from_bal - amount}})
-            db["USERS"].update_one({'USR_NAME': user_to},
-                                   {'$set': {'BALANCE': to_bal + amount}})
+        if amount > from_bal:
+            return render_template("transfer.html", error="Insufficient balance!")
 
-            db["TRANSACTIONS"].insert_one(
-                {'TIME': datetime.datetime.now(),
-                 'FROM': user_from,
-                 'TO': user_to,
-                 'AMOUNT': amount,
-                 'REMARK': remark})
+        with mongodb.start_session() as session:
+            with session.start_transaction():
+                db["USERS"].update_one({'USR_NAME': user_from},
+                                    {'$set': {'BALANCE': from_bal - amount}})
+                db["USERS"].update_one({'USR_NAME': user_to},
+                                    {'$set': {'BALANCE': to_bal + amount}})
 
-    return redirect(url_for('transfer', success=True))
+                db["TRANSACTIONS"].insert_one({
+                    'TIME': datetime.datetime.now(),
+                    'FROM': user_from,
+                    'TO': user_to,
+                    'AMOUNT': amount,
+                    'REMARK': remark
+                })
+
+        return render_template('transfer.html', success="Payment successful!")
+
+    return render_template("transfer.html")
 
 
 @app.route("/election", methods=("GET", "POST"))
