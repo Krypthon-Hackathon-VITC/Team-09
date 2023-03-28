@@ -187,7 +187,6 @@ def signup():
         return Response(status=200)
     return Response(status=400)
 
-
 @app.route("/election/stand", methods=("POST", "GET"))
 @jwt_required()
 def election_stand():
@@ -269,3 +268,32 @@ def election_results():
         del vote_dict['_id']
         vote_lst.append(vote_dict)
     return jsonify(vote_lst)
+
+@app.route("/loan", methods=("GET", "POST"))
+@jwt_required()
+def loan():
+    if request.method == 'GET':
+        success = request.args.get('success') or False
+        return render_template("loan.html", success=success)
+
+    user = json.loads(get_jwt_identity())["user"]
+    
+    db["LOANS"].insert_one({
+        'USR_NAME': user,
+        'APPLICATION_DATE': datetime.datetime.now(),
+        'REVIEW_DATE': None,
+        'TIME_DURATION': request.form.get('time_duration'),
+        'INTEREST': 0.08,
+        'AMOUNT': request.form.get('amount'),
+        'L_TYPE': request.form.get('l_type'),
+        'ASSETS': {
+            'housing': request.form.get('assets_housing'),
+            'car': request.form.get('assets_car'),
+            'gold': request.form.get('assets_gold')
+            },
+        'CONFIDENCE': 0,
+        'APPROVE_STATUS': False,
+        'RETURNED': False,
+    })
+
+    return redirect(url_for('loan', success=True))
