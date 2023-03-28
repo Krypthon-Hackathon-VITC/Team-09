@@ -110,9 +110,10 @@
         fetch("/login", {
             method: "POST",
             body: formData
-        }).then((res) => res.json())
-            .then((data) => {
-                sessionStorage.setItem("access-token", data);
+        }).then((res) => {
+                if(res.ok){
+                    document.getElementById("login-login-upper").style.backgroundColor = "green";
+                }
             })
     }
 

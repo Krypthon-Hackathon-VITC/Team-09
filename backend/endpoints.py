@@ -1,6 +1,6 @@
 import json
-from flask import jsonify, render_template, Response, request
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask import jsonify, render_template, Response, request, make_response
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies
 import datetime
 from helper import *
 import hashlib
@@ -24,7 +24,9 @@ def login():
         if query is not None:
             if query["PASS"].lower() == password.lower():
                 jwt_token = create_access_token(identity=json.dumps({"user":username}))
-                return jsonify(jwt_token)
+                res = Response(status=200)
+                set_access_cookies(res, jwt_token)
+                return res
         else:
             return Response(status=401)
 
