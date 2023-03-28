@@ -18,7 +18,7 @@
 
 <div id="election-time-wrapper">
     <span>Next Election Date</span>
-    <div id="election-time"></div>
+    <div id="election-time">{{ next_election }}</div>
 </div>
 <div id="election-wrapper">
     <div class="election-cards">
@@ -77,20 +77,4 @@
     </div>
 
 </div>
-
-<div class="election-view">
-
-</div>
-
-{% endblock %}
-
-{% block below_body %}
-<script>
-    fetch("/balance", {
-        method: "POST"
-    }).then((res) => res.json())
-        .then((data) => {
-            // document.getElementById("dashboard-balance").innerHTML = data[""];
-        })
-</script>
 {% endblock %}
