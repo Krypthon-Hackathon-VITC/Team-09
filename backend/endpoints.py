@@ -19,7 +19,7 @@ from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, \
 def refresh_expiring_jwts(response):
     try:
         exp_timestamp = get_jwt()["exp"]
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(datetime.timezone.utc)
         target_timestamp = datetime.datetime.timestamp(
             now + datetime.timedelta(minutes=15))
         if target_timestamp - exp_timestamp < 15:
@@ -155,25 +155,11 @@ def election():
 @app.route("/complaint", methods=("GET", "POST"))
 @jwt_required()
 def complaint():
-    if request.method == "GET":
-        success = request.args.get('success') or False
-        error = request.args.get('error') or False
-    username = json.loads(get_jwt_identity())["user"]
-    tickets = list(db["TICKETS"].find({'FROM': username}))
-    if request.method == "POST":
-        return jsonify({'tickets': tickets})
-    return render_template("complaint.html", complaints=tickets, success=success, error=error)
-
-
-@app.route("/new-ticket", methods=("POST",))
-@jwt_required()
-def new_ticket():
     form = ComplaintForm(request.form)
-
+    username = get_jwt_username()
     if form.validate():
-        username = json.loads(get_jwt_identity())["user"]
-        subject = request.form["subject"]
-        body = request.form["body"]
+        subject = form["subject"].data
+        body = form["body"].data
         db["TICKETS"].insert_one({
             "FROM": username,
             "SUBJECT": subject,
@@ -183,9 +169,10 @@ def new_ticket():
             "TICKET_ID": str(uuid.uuid4()).replace("-", ""),
             "REPLY": ""
         })
+        return render_template('complaint.html', success="Ticket successfully created!")
 
-        return redirect(url_for('complaint', success=True))
-    return redirect(url_for('complaint', success=False))
+    tickets = list(db["TICKETS"].find({'FROM': username}))
+    return render_template("complaint.html", tickets=tickets)
 
 
 @app.route("/signup", methods=("POST",))

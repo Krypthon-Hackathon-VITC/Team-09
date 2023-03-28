@@ -53,7 +53,7 @@ class TransferForm(Form):
 
 class ComplaintForm(Form):
     subject = StringField('subject', validators=[input_required()])
-    body = PasswordField('body', validators=[input_required()])
+    body = StringField('body')
     submit = SubmitField('submit')
 
 

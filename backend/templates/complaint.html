@@ -3,11 +3,6 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='complaint.css') }}">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-qKXV1j0HvMUeCBQ+QVp7JcfGl760yU08IQ+GpUo5hlbpg51QRiuqHAJz8+BrxE/N"
-    crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block more_header %}
@@ -18,19 +13,19 @@
 <div class="container">
     {% if success %}
     <div class="alert alert-success" role="alert">
-        Created the Ticket
+        {{ success }}
     </div>
     {% endif %}
     {% if error %}
     <div class="alert alert-danger" role="alert">
-        Some error occured while creating the ticket
+        {{ error }}
     </div>
     {% endif %}
     <select class="form-select mb-3" onchange="complaint_select(this);" aria-label="Default select example">
         <option value="1" selected>New Ticket</option>
         <option value="2">Track Ticket</option>
     </select>
-    <form class="complaint-form-new" action="/new-ticket" method="post">
+    <form class="complaint-form-new" method="post">
         <div class="mb-3">
             <label for="complaint-form-new-subject" class="form-label">Subject</label>
             <input type="text" class="form-control" id="complaint-form-new-subject" name="subject">
@@ -54,19 +49,25 @@
                 </tr>
             </thead>
             <tbody>
-                {% for ticket in complaints %}
+                {% for ticket in tickets %}
                 <tr onclick="complaint_reply(this);" tid="{{ ticket['TICKET_ID'] }}"
-                sub="{{ ticket['SUBJECT'] }}"
-                status="{{ ticket['STATUS'] }}"
-                bdy="{{ ticket['BODY'] }}" 
-                rpy  = "{{ ticket['REPLY'] }}">
-                    <td data-sort="{{ticket['TIME']}}">
-                        {{ ticket['TIME'].strftime('%H:%M') }}
+                sub="{{ ticket.SUBJECT }}"
+                status="{{ ticket.STATUS }}"
+                bdy="{{ ticket.BODY }}" 
+                rpy  = "{{ ticket.REPLY }}">
+                    <td data-sort="{{ ticket.TIME }}">
+                        {{ ticket.TIME.strftime('%H:%M') }}
                     </td>
-                    <td>{{ ticket['TIME'].strftime('%Y-%m-%d') }}</td>
-                    <td>{{ ticket['TICKET_ID'] }}</td>
-                    <td>{{ ticket['SUBJECT'] }}</td>
-                    <td>{{ ticket['STATUS'] }}</td>
+                    <td>{{ ticket.TIME.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ ticket.TICKET_ID }}</td>
+                    <td>{{ ticket.SUBJECT }}</td>
+                    <td>
+                        {% if ticket.STATUS == true %}
+                        <span class="badge text-bg-success">Open</span>
+                        {% elif ticket.STATUS == false %}
+                        <span class="badge text-bg-dark">Closed</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
