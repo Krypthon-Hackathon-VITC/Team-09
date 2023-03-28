@@ -40,3 +40,9 @@ class SignupForm(Form):
         pattern = r"[0-9]{10}"
         if not re.match(pattern, field.data):
             raise ValidationError("Invalid phone number")
+
+
+class ComplaintForm(Form):
+    subject = StringField('subject', validators=[input_required()])
+    body = PasswordField('body', validators=[input_required()])
+    submit = SubmitField('submit')

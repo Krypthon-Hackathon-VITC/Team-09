@@ -1,0 +1,48 @@
+.main {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    min-height: calc(100vh - 80px);
+    margin-top: 80px;
+}
+
+.election-link {
+    text-decoration: none;
+    width: 200px;
+    height: 200px;
+}
+
+#election-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+}
+
+.election-cards {
+    width: 200px;
+    height: 200px;
+    display: grid;
+    grid-template-rows: 1fr 30px;
+    justify-items: center;
+    align-items: center;
+    background-color: greenyellow;
+    color: black;
+    cursor: pointer;
+}
+
+.election-cards svg {
+    transform: scale(3);
+}
+
+#election-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 90px;
+}
+
+#election-time-wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

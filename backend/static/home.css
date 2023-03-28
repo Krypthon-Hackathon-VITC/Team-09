@@ -1,3 +1,7 @@
+header{
+    height: 20px;
+}
+
 .login {
     right: 0;
     position: fixed;
@@ -29,6 +33,7 @@
     flex-direction: column;
     gap: 10px;
     display: none;
+    background-color: white;
 }
 
 .login-page-head {
