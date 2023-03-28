@@ -73,5 +73,7 @@ class ElectionsVote(Form):
             choices.append((str(cid), cname))
         self.candidate.choices = choices
 
-class LoanForm(Form):
-    pass
+class LoanFormPredict(Form):
+    gender = StringField('gender', validators=[input_required()])
+
+    

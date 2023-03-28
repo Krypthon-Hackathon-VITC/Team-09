@@ -1,4 +1,5 @@
 import os
+import pickle
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from pymongo import MongoClient
@@ -19,5 +20,8 @@ mongo_uri = os.environ.get("MONGO_URI") or "mongo-uri"
 maxSevSelDelay=1000
 mongodb = MongoClient(mongo_uri, serverSelectionTimeoutMS=maxSevSelDelay)
 db = mongodb['BANK_DATA']
+
+with open('../model/MODEL.pkl', 'rb') as f:
+    MODEL = pickle.load(f)
 
 import endpoints

@@ -7,8 +7,8 @@ from helper import *
 
 import hashlib
 
-from app import app, db, mongodb
-from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanForm
+from app import app, db, mongodb, MODEL
+from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanFormPredict
 
 
 @app.route("/")
@@ -315,3 +315,25 @@ def loan():
     })
 
     return redirect(url_for('loan', success=True))
+
+
+@app.route("/predict", methods=("POST",))
+@jwt_required()
+def predict_loan():
+    form = LoanFormPredict(request.form)
+    if form.validate():
+        features = [
+            [
+                request.form.get("gender"),
+                request.form.get("married"),
+                request.form.get("dependents"),
+                request.form.get("education"),
+                request.form.get("self_employed"),
+                request.form.get("applicantincome"),
+                request.form.get("coapplicantincome"),
+                request.form.get("loanamount"),
+                request.form.get("loan_amount_term"),
+                request.form.get("property_area")
+            ]
+        ]
+        print(MODEL.predict(features))
