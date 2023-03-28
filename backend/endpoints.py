@@ -1,11 +1,11 @@
-import json
-import uuid
 from flask import jsonify, render_template, Response, request, make_response, url_for, redirect
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies
-import datetime
 from helper import *
 
+import datetime
 import hashlib
+import json
+import uuid
 
 from app import app, db, mongodb, MODEL
 from forms import LoginForm, SignupForm, ComplaintForm, ElectionStand, ElectionsVote, LoanForm
@@ -16,22 +16,21 @@ def homepage():
     return render_template("index.html", indexhai=True)
 
 
-@app.route("/login", methods=("POST", "GET"))
+@app.route("/login", methods=("POST",))
 def login():
     form = LoginForm(request.form)
-
     if form.validate():
         username = request.form["username"]
         password = request.form.get("password")
-        password = hashlib.sha256(password.encode()).hexdigest()
         query = db["USERS"].find_one({"USR_NAME": username})
         if query is not None:
-            if query["PASS"].lower() == password.lower():
+            hash = query["PASS"]
+            if check_password_hash(password, hash):
                 jwt_token = create_access_token(
                     identity=json.dumps({"user": username}))
-                res = make_response(redirect(url_for('bank')))
-                set_access_cookies(res, jwt_token)
-                return res
+                response = make_response(redirect(url_for('bank')))
+                set_access_cookies(response, jwt_token)
+                return response
         else:
             return Response(status=401)
 
