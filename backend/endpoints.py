@@ -338,12 +338,12 @@ def election_vote():
 
 @app.route("/election/results", methods=("POST", "GET"))
 def election_results():
-    election_latest = db["ELECTIONS"].find_one()
+    election = db["ELECTIONS"].find_one()
     candidates = db["CANDIDATES"].find({
-        "ELECTION_ID": str(election_latest["_id"])
+        "ELECTION_ID": election["_id"]
     })
 
-    vote_lst = []
+    votes_list = []
     for candidate in candidates:
         votes = db["VOTES"].count_documents({
             "CANDIDATE_ID": candidate["CANDIDATE_ID"]
@@ -352,14 +352,14 @@ def election_results():
             "_id" : ObjectId(candidate["CANDIDATE_ID"])
         })
         
-        vote_lst.append({
+        votes_list.append({
             "CANDIDATE_ID" : candidate["CANDIDATE_ID"],
             "VOTES" : votes,
             "NAME" : candidate_name["NAME"],
             "USR_NAME" : candidate_name["USR_NAME"],
             "STATE" : candidate["REGION"]
         })
-    return render_template("election_results.html", vote_list=vote_lst)
+    return render_template("election_results.html", vote_list=votes_list)
 
 
 @app.route("/loan", methods=("GET", "POST"))

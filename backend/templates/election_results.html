@@ -24,11 +24,11 @@
         <tbody>
             {% for vote in vote_list %}
             <tr>
-                <td>{{ vote['CANDIDATE_ID'] }}</td>
-                <td>{{ vote['STATE'] }}</td>
-                <td>{{ vote['USR_NAME'] }}</td>
-                <td>{{ vote['NAME'] }}</td>
-                <td data-sort="{{vote['VOTES']}}">{{ vote['VOTES'] }}</td>
+                <td>{{ vote.CANDIDATE_ID }}</td>
+                <td>{{ vote.STATE }}</td>
+                <td>{{ vote.USR_NAME }}</td>
+                <td>{{ vote.NAME }}</td>
+                <td data-sort="{{vote.VOTES }}">{{ vote.VOTES }}</td>
             </tr>
             {% endfor %}
         </tbody>
