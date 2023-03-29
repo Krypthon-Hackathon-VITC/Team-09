@@ -8,6 +8,8 @@
 
 ## About the project
 
+1. The project aims to achieve fully digital cooperative bank with some novelty features like holding elections for board members, participating in elections without bias, loan approval using Machine Learning model.  
+
 ## Setup instructions
 1. Clone this repo
 
@@ -36,6 +38,20 @@
     ```
 
 1. Run flask server using
-    ```bash
-    flask run
+    ```
+    bash 
+    cd backend
+    python3 run.py
+    ```
+
+## Training the model
+
+1. Add the dataset path in `new_model.py`
+    ```
+    url = "<Dataset url or path>"
+    ```
+
+1. Run `new_model.py`, it generates the trained model file `MODEL.pkl` 
+    ```
+    python3 new_model.py
     ```
