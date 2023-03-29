@@ -103,7 +103,7 @@ def transfer():
     if form.validate():
         user_from = get_jwt_username()
         user_to = form["user_to"].data
-        amount = form["amount"].data
+        amount = int(form["amount"].data)
         remark = form["remark"].data
 
         if user_to == user_from:
@@ -233,7 +233,7 @@ def election_board():
 def election_candidates():
     election_latest = db["ELECTIONS"].find_one()
     candidates = list(db["CANDIDATES"].find({
-        "ELECTION_ID": str(election_latest["_id"])
+        "ELECTION_ID": election_latest["_id"]
     }))
     regions = set()
     for i in range(len(candidates)):
